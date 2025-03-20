@@ -14,7 +14,7 @@
   <img width="256" height="256" src="https://github.com/QEDProtocol/doge-light-client/raw/main/static/sol-doge-logo.png?raw=true">
   </a>
 
-  <h3 align="center">DLC: Doge Light Client/h3>
+  <h3 align="center">DLC: Doge Light Client</h3>
 
   <p align="center">
 A fully featured light client for Dogecoin implemented in Rust 🦀, designed for implementing efficient trustless bridges between Dogecoin and the rest of the blockchain universe 🌍 (especially Solana～).
