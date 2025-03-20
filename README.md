@@ -1,8 +1,32 @@
-# QED Doge Light Client
-A fully featured light client for Dogecoin
+<a name="readme-top"></a>
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
 
 
 
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/QEDProtocol/doge-light-client">
+  <img width="256" height="256" src="https://github.com/QEDProtocol/doge-light-client/raw/main/static/sol-doge-logo.png?raw=true">
+  </a>
+
+  <h3 align="center">DLC: Doge Light Client/h3>
+
+  <p align="center">
+A fully featured light client for Dogecoin implemented in Rust 🦀, designed for implementing efficient trustless bridges between Dogecoin and the rest of the blockchain universe 🌍 (especially Solana～).
+  </p>
+  <p align="center">Made with ❤️ by <a href="https://x.com/cmpeq" target="_blank">Carter Feldman</a> at <a href="https://QEDProtocol.com" target="_blank">QED</a></p>
+</div>
+
+## Features
+* Supports correct calculation of block difficulty for Mainnet, Testnet, and Regtest
+* Supports AuxPow/Non-AuxPow blocks for Mainnet and Testnet
+* Maintains a constant-memory merkle tree of all blocks processed
+* Fully zerocopy for on-chain usage
 
 
 
