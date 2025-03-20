@@ -19,7 +19,7 @@
   <p align="center">
 A fully featured light client for Dogecoin implemented in Rust 🦀, designed for implementing efficient trustless bridges between Dogecoin and the rest of the blockchain universe 🌍 (especially Solana～).
   </p>
-  <p align="center">Made with ❤️ by <a href="https://x.com/cmpeq" target="_blank">Carter Feldman</a> at <a href="https://QEDProtocol.com" target="_blank">QED</a></p>
+  <p align="center">Made with ❤️ by <a href="https://x.com/QEDProtocol" target="_blank">QED</a></p>
 </div>
 
 ## Features
