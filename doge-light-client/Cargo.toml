@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["solprogram", "borsh"]
+default = ["borsh"]
 borsh = ["dep:borsh"]
 serde = ["dep:serde", "dep:serde_with"]
 bitcoin = ["dep:bitcoin", "serde"]
