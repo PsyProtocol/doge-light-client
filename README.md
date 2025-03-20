@@ -55,3 +55,14 @@ substantial portions of the software:
 
 "This software was created by QED (https://qedprotocol.com)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
+
+
+
+[contributors-shield]: https://img.shields.io/github/contributors/QEDProtocol/doge-light-client.svg?style=for-the-badge
+[contributors-url]: https://github.com/QEDProtocol/doge-light-client/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/QEDProtocol/doge-light-client.svg?style=for-the-badge
+[forks-url]: https://github.com/QEDProtocol/doge-light-client/network/members
+[stars-shield]: https://img.shields.io/github/stars/QEDProtocol/doge-light-client.svg?style=for-the-badge
+[stars-url]: https://github.com/QEDProtocol/doge-light-client/stargazers
+[issues-shield]: https://img.shields.io/github/issues/QEDProtocol/doge-light-client.svg?style=for-the-badge
+[issues-url]: https://github.com/QEDProtocol/doge-light-client/issues
