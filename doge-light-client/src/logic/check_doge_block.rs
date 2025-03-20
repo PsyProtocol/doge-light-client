@@ -98,20 +98,8 @@ pub fn check_block_header_err<NC: DogeNetworkConfig>(
         first_block_time as i64,
         block_header.header.timestamp as i64,
     );
-    /*
-        println!(r#"{{
-        lastHeight: {},
-        nFirstBlockTime: {},
-        lastBlockTime: {},
-        lastBits: {},
-        expectedNextBits: {},
-        networkType: NETWORK_TYPE_MAINNET,
-    }}"#, last_height, first_block_time, last_block_time, last_bits, expected_difficulty_bits);
-
-    */
     if expected_difficulty_bits != block_header.header.bits {
         return Err(DogeBridgeError::DifficutlyBitsMismatch);
-        //anyhow::bail!("Difficulty bits mismatch, expected 0x{:08x}, got 0x{:08x}", expected_difficulty_bits, block_header.header.bits);
     }
     if block_header.aux_pow.is_none() {
         if !check_proof_of_work::<NC>(if known_pow_block_hash.is_some() {
