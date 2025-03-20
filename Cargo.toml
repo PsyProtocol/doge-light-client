@@ -1,0 +1,4 @@
+[workspace]
+resolver = "2"
+members = [ "qed-doge-data-link", "doge-light-client"]
+
