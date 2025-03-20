@@ -29,47 +29,6 @@ use crate::{
 };
 
 use super::check_doge_block_seq::{check_proof_of_work, get_next_work_required};
-/*
-pub fn check_block_header(
-    block_header: &QDogeBlockHeader,
-    last_block_time: i64,
-    last_bits: u32,
-    first_block_time: i64,
-) -> bool {
-    if block_header.header.is_aux_pow() != block_header.aux_pow.is_some() {
-        return false;
-    }
-    let expected_difficulty_bits = get_next_work_required(
-        last_block_time,
-        last_bits,
-        first_block_time,
-        block_header.header.timestamp as i64,
-    );
-    if block_header.aux_pow.is_none() {
-        expected_difficulty_bits == block_header.header.bits
-            && check_proof_of_work(block_header.header.get_pow_hash(), block_header.header.bits)
-    } else {
-        if expected_difficulty_bits == block_header.header.bits
-            && check_proof_of_work(
-                block_header
-                    .aux_pow
-                    .as_ref()
-                    .unwrap()
-                    .parent_block
-                    .get_pow_hash(),
-                block_header.header.bits,
-            )
-        {
-            block_header.aux_pow.as_ref().unwrap().check(
-                block_header.header.get_hash(),
-                block_header.header.get_chain_id(),
-            )
-        } else {
-            false
-        }
-    }
-}
-*/
 
 pub fn check_block_header_err<NC: DogeNetworkConfig>(
     last_height: u32,
@@ -81,10 +40,6 @@ pub fn check_block_header_err<NC: DogeNetworkConfig>(
 ) -> QDogeResult<()> {
     if block_header.header.is_aux_pow() != block_header.aux_pow.is_some() {
         return Err(DogeBridgeError::AuxPowVersionBitsMismatch);
-    }
-    if !block_header.header.is_aux_pow() && NC::NETWORK_TYPE == DogeNetworkType::MainNet {
-        // always require auxpow on mainnet
-        return Err(DogeBridgeError::AuxPowMissing);
     }
     if NC::NETWORK_PARAMS.strict_chain_id
         && NC::NETWORK_PARAMS.aux_pow_chain_id != block_header.header.get_chain_id()
