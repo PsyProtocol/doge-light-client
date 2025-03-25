@@ -38,23 +38,24 @@ const OP_DUP: u8 = 118;
 const OP_EQUALVERIFY: u8 = 136;
 const OP_HASH160: u8 = 169;
 const OP_CHECKSIG: u8 = 172;
+const OP_PUSHBYTES_20: u8 = 0x14;
 
-//  size = 1 + 32 + 3 + 20 + 2 = 58
-pub const STANDARD_TRANSFER_WITH_MESSAGE_TEMPLATE: [u8; 58] = qed_doge_macros::const_concat_arrays!(
+//  size = 1 + 32 + 4 + 20 + 2 = 59
+pub const STANDARD_TRANSFER_WITH_MESSAGE_TEMPLATE: [u8; 59] = qed_doge_macros::const_concat_arrays!(
     [OP_PUSHBYTES_32],
     [0; 32], // 1..33
-    [OP_DROP, OP_DUP, OP_HASH160],
-    [0; 20], // 36..56
+    [OP_DROP, OP_DUP, OP_HASH160, OP_PUSHBYTES_20],
+    [0; 20], // 37..57
     [OP_EQUALVERIFY, OP_CHECKSIG]
 );
 
 pub fn get_transfer_with_message_redeem_script(
     message: &[u8],
     public_key_hash: &[u8],
-) -> [u8; 58] {
+) -> [u8; 59] {
     let mut base = STANDARD_TRANSFER_WITH_MESSAGE_TEMPLATE.clone();
     base[1..33].copy_from_slice(message);
-    base[36..56].copy_from_slice(public_key_hash);
+    base[37..57].copy_from_slice(public_key_hash);
 
     base
 }
