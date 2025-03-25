@@ -1,0 +1,29 @@
+[package]
+name = "qed-doge-bridge-helper"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+borsh = []
+serde = []
+solprogram = []
+default = ["borsh"]
+
+[dependencies]
+borsh = { version = "0.10.4" }
+doge-light-client = { path = "../doge-light-client", default-features = false, features = ["borsh"] }
+qed-doge-macros = { path = "../qed-doge-macros" }
+
+thiserror = "^1.0"
+num-derive = "^0.3"
+num-traits = "^0.2"
+anyhow = { version = "1.0.75", default-features = false, features = [] }
+
+
+[dev-dependencies]
+rand = "0.8"
+rand_core = "0.6.0"
+hex = "0.4.3"
+hex-literal = "0.4.1"
+doge-light-client = { path = "../doge-light-client", default-features = false, features = ["borsh", "sha2", "std"] }
+bs58 = { version = "0.5.1", default-features = false, features = ["check", "alloc"] }

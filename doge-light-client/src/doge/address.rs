@@ -29,7 +29,7 @@ use std::str::FromStr;
 
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use crate::{constants::{P2PKH_ADDRESS_CHECK58_VERSION, P2SH_ADDRESS_CHECK58_VERSION}, core_data::QHash160, hash::{ripemd160::QBTCHash160Hasher, traits::BytesHasher}};
+use crate::{constants::{DogeMainNetConfig, DogeNetworkConfig, DogeRegTestConfig, DogeTestNetConfig}, core_data::QHash160, hash::{ripemd160::QBTCHash160Hasher, traits::BytesHasher}};
 
 use super::transaction::BTCTransactionOutput;
 
@@ -89,16 +89,27 @@ impl BTCAddressType {
     pub fn to_u8(&self) -> u8 {
         *self as u8
     }
-    pub fn to_version_byte(&self) -> u8 {
+    pub fn to_version_byte<NC: DogeNetworkConfig>(&self) -> u8 {
         match self {
-            BTCAddressType::P2PKH => P2PKH_ADDRESS_CHECK58_VERSION,
-            BTCAddressType::P2SH => P2SH_ADDRESS_CHECK58_VERSION,
+            BTCAddressType::P2PKH => NC::P2PKH_VERSION_BYTE,
+            BTCAddressType::P2SH => NC::P2SH_VERSION_BYTE,
         }
     }
     pub fn try_from_version_byte(version_byte: u8) -> anyhow::Result<Self> {
         match version_byte {
-            P2PKH_ADDRESS_CHECK58_VERSION => Ok(BTCAddressType::P2PKH),
-            P2SH_ADDRESS_CHECK58_VERSION => Ok(BTCAddressType::P2SH),
+            DogeMainNetConfig::P2PKH_VERSION_BYTE => Ok(BTCAddressType::P2PKH),
+            DogeMainNetConfig::P2SH_VERSION_BYTE => Ok(BTCAddressType::P2SH),
+
+
+            DogeTestNetConfig::P2PKH_VERSION_BYTE => Ok(BTCAddressType::P2PKH),
+            DogeTestNetConfig::P2SH_VERSION_BYTE => Ok(BTCAddressType::P2SH),
+
+
+            DogeRegTestConfig::P2PKH_VERSION_BYTE => Ok(BTCAddressType::P2PKH),
+
+            // regtest p2sh is the same as testnet
+            // DogeRegTestConfig::P2SH_VERSION_BYTE => Ok(BTCAddressType::P2SH),
+
             _ => Err(anyhow::format_err!(
                 "Invalid BTCAddressType version byte: {}",
                 version_byte
@@ -181,9 +192,9 @@ impl BTCAddress160 {
             address,
         }
     }
-    pub fn to_address_string(&self) -> String {
+    pub fn to_address_string<NC: DogeNetworkConfig>(&self) -> String {
         bs58::encode(self.address)
-            .with_check_version(self.address_type.to_version_byte())
+            .with_check_version(self.address_type.to_version_byte::<NC>())
             .into_string()
     }
 }
@@ -212,11 +223,6 @@ impl From<&BTCAddress160> for String {
     }
 }
 */
-impl ToString for BTCAddress160 {
-    fn to_string(&self) -> String {
-        self.to_address_string()
-    }
-}
 
 impl FromStr for BTCAddress160 {
     type Err = anyhow::Error;

@@ -1,4 +1,7 @@
-/*
+# qed-doge-bridge-helper
+A fully featured light client for Dogecoin
+
+## License
 Copyright (C) 2025 Zero Knowledge Labs Limited, QED Protocol
 
 This program is free software: you can redistribute it and/or modify
@@ -22,16 +25,3 @@ substantial portions of the software:
 
 "This software was created by QED (https://qedprotocol.com)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
-*/
-
-pub mod traits;
-pub mod electrs_link;
-pub mod block_cache;
-
-pub mod chain_state_helper;
-pub mod block_header_cache;
-pub mod bridge_state_helpers;
-pub mod hex_helpers;
-pub mod wrapped_hash_256;
-pub mod simple_merkle_node;
-pub mod simple_merkle_tree;

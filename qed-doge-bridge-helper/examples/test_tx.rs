@@ -24,40 +24,23 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-use crate::hash::traits::MerkleHasher;
+use std::str::FromStr;
+
+use doge_light_client::{constants::DogeTestNetConfig, doge::address::BTCAddress160};
+use qed_doge_bridge_helper::tx_template::get_bridge_deposit_address_v1;
+
+fn main(){
+    let solana_public_key = hex_literal::hex!("e83c24b97aeadd8de838b7c040347ac9e821a103c38b2999a7989f7a6181e0d8");
+
+    let bridge_public_key_hash = BTCAddress160::from_str("nidKRv4eeRaLzngA34r8epXFNnJS54GJ1R").unwrap().address;
+    println!("bridgepkh: {}", hex::encode(bridge_public_key_hash));
+
+    let deposit_address = get_bridge_deposit_address_v1(&solana_public_key, &bridge_public_key_hash);
+
+    println!("deposit_address: {}", deposit_address.to_address_string::<DogeTestNetConfig>());
 
 
-pub fn compute_root_merkle_proof_generic<Hash: PartialEq + Copy, H: MerkleHasher<Hash>>(
-    value: Hash,
-    index: u64,
-    siblings: &[Hash]
-) -> Hash {
-    let mut current = value;
-    let mut ind_tracker = index;
-    for sibling in siblings.iter() {
-        current = H::two_to_one_swap((ind_tracker & 1) == 1,&current, sibling);
-        ind_tracker >>= 1;
-    }
-    current
-}
 
 
-pub fn compute_partial_merkle_root_from_leaves<
-    Hash: PartialEq + Copy,
-    Hasher: MerkleHasher<Hash>,
->(
-    leaves: &[Hash],
-) -> Hash {
-    let mut current = leaves.to_vec();
-    while current.len() > 1 {
-        let mut next = vec![];
-        for i in 0..current.len() / 2 {
-            next.push(Hasher::two_to_one(&current[2 * i], &current[2 * i + 1]));
-        }
-        if current.len() % 2 == 1 {
-            next.push(current[current.len() - 1]);
-        }
-        current = next;
-    }
-    current[0]
+
 }

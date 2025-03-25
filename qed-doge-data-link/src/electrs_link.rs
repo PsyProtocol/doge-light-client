@@ -27,11 +27,11 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 use std::time::Duration;
 
 use bitcoin::{block::SimpleHeader, hashes::Hash, Block};
-use doge_light_client::{core_data::{QAuxPow, QDogeBlock, QDogeBlockHeader, QHash256, QMerkleBranch, QStandardBlockHeader}, doge::transaction::BTCTransaction, network_params::DogeNetworkType};
-use serde::de::DeserializeOwned;
+use doge_light_client::{core_data::{QAuxPow, QDogeBlock, QDogeBlockHeader, QHash256, QMerkleBranch, QStandardBlockHeader}, doge::transaction::BTCTransaction, hash::{merkle::{merkle_proof::MerkleProofCore, utils::compute_root_merkle_proof_generic}, sha256::QBTCHash256Hasher}, network_params::DogeNetworkType};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use ureq::Agent;
 
-use crate::traits::{QDogeBlockFetcher, QDogeBlockHeaderFetcher};
+use crate::{traits::{QDogeBlockFetcher, QDogeBlockHeaderFetcher}, wrapped_hash_256::WrappedHash256};
 
 
 #[derive(Debug, Clone)]
@@ -39,6 +39,29 @@ pub struct DogeLinkElectrsClient {
     electrs_url: String,
     pub network: DogeNetworkType,
     electrs_client: ureq::Agent,
+}
+
+
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct ElectrumMerkleProofOutput {
+    pub merkle: Vec<WrappedHash256>,
+    pub block_height: u32,
+    pub pos: u32,
+}
+
+impl ElectrumMerkleProofOutput {
+    pub fn to_merkle_proof_core_with_txid(&self, txid: QHash256) -> MerkleProofCore<QHash256> {
+        let g_siblings = self.merkle.iter().map(|x|x.reversed().0).collect::<Vec<QHash256>>();
+        let value = WrappedHash256(txid).reversed().0;
+        let root = compute_root_merkle_proof_generic::<QHash256, QBTCHash256Hasher>(value, self.pos as u64, &g_siblings);
+        MerkleProofCore {
+            siblings: g_siblings,
+            root: root,
+            value: value,
+            index: self.pos as u64,
+        }
+    }
 }
 
 
@@ -115,6 +138,28 @@ impl DogeLinkElectrsClient {
         let mut hash = [0u8; 32];
         hex::decode_to_slice(hash_txt, &mut hash)?;
         Ok(hash)
+    }
+    pub fn get_q_tx_from_txid(&self, txid: QHash256) -> anyhow::Result<BTCTransaction> {
+        let txid_str = hex::encode(txid);
+        let bytes = self.get_bytes(&format!("tx/{}/raw", txid_str))?;
+        BTCTransaction::from_bytes(&bytes)
+    }
+    pub fn get_electrum_merkle_proof_from_txid(&self, txid: QHash256) -> anyhow::Result<ElectrumMerkleProofOutput> {
+        let txid_str = hex::encode(txid);
+        self.get_json(&format!("tx/{}/merkle-proof", txid_str))
+    }
+    pub fn get_electrum_merkle_proof_from_tx_hash(&self, tx_hash: QHash256) -> anyhow::Result<ElectrumMerkleProofOutput> {
+        let mut txid = [0u8; 32];
+        txid.copy_from_slice(&tx_hash);
+        txid.reverse();
+        let txid_str = hex::encode(txid);
+        self.get_json(&format!("tx/{}/merkle-proof", txid_str))
+    }
+    pub fn get_q_merkle_proof_from_txid(&self, txid: QHash256) -> anyhow::Result<MerkleProofCore<QHash256>> {
+        Ok(self.get_electrum_merkle_proof_from_txid(txid)?.to_merkle_proof_core_with_txid(txid))
+    }
+    pub fn get_q_merkle_proof_from_tx_hash(&self, tx_hash: QHash256) -> anyhow::Result<MerkleProofCore<QHash256>> {
+        Ok(self.get_electrum_merkle_proof_from_tx_hash(tx_hash)?.to_merkle_proof_core_with_txid(WrappedHash256(tx_hash).reversed().0))
     }
     pub fn get_block(&self, height: u32) -> anyhow::Result<Block> {
         let hash_txt = self.get_text(&format!("block-height/{}", height))?;

@@ -1,4 +1,9 @@
 [workspace]
 resolver = "2"
-members = [ "qed-doge-data-link", "doge-light-client"]
+members = [ 
+    "qed-doge-data-link",
+    "doge-light-client",
+    "qed-doge-bridge-helper",
+    "qed-doge-macros"
+]
 

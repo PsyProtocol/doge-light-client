@@ -25,7 +25,7 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 use crate::network_params::{DogeNetworkParams, DogeNetworkType};
-
+/*
 // P2SH: regtest = 0xc4, testnet = 0xc4, mainnet = 0x16
 pub const P2SH_ADDRESS_CHECK58_VERSION: u8 = 0xc4;
 
@@ -34,6 +34,8 @@ pub const P2PKH_ADDRESS_CHECK58_VERSION: u8 = 0x71;
 
 
 pub const DOGE_NETWORK_TYPE: DogeNetworkType = DogeNetworkType::MainNet;
+
+*/
 pub const MERGED_MINING_HEADER: [u8; 4] = [0xfa, 0xbe, 0x6d, 0x6d];
 
 const DOGE_REGTEST_PARAMS: DogeNetworkParams = DogeNetworkParams {
@@ -68,6 +70,12 @@ const DOGE_MAINNET_PARAMS: DogeNetworkParams = DogeNetworkParams {
 pub trait DogeNetworkConfig {
     const NETWORK_TYPE: DogeNetworkType;
     const NETWORK_PARAMS: DogeNetworkParams;
+
+    const P2PKH_VERSION_BYTE: u8;
+    const P2SH_VERSION_BYTE: u8;
+    const PRIVATE_KEY_VERSION_BYTE: u8;
+    const START_ADDRESS_STRING_CHAR: char;
+    const START_ADDRESS_STRING_BYTE: u8;
 }
 
 #[derive(Clone, Copy, Default, Ord, PartialEq, Eq, PartialOrd)]
@@ -75,6 +83,12 @@ pub struct DogeMainNetConfig;
 impl DogeNetworkConfig for DogeMainNetConfig {
     const NETWORK_TYPE: DogeNetworkType = DogeNetworkType::MainNet;
     const NETWORK_PARAMS: DogeNetworkParams = DOGE_MAINNET_PARAMS;
+
+    const P2PKH_VERSION_BYTE: u8 = 0x1E;
+    const P2SH_VERSION_BYTE: u8 = 0x16;
+    const PRIVATE_KEY_VERSION_BYTE: u8 = 0x9E;
+    const START_ADDRESS_STRING_CHAR: char = 'D';
+    const START_ADDRESS_STRING_BYTE: u8 = 0x44;
 }
 
 #[derive(Clone, Copy, Default, Ord, PartialEq, Eq, PartialOrd)]
@@ -82,6 +96,12 @@ pub struct DogeTestNetConfig;
 impl DogeNetworkConfig for DogeTestNetConfig {
     const NETWORK_TYPE: DogeNetworkType = DogeNetworkType::TestNet;
     const NETWORK_PARAMS: DogeNetworkParams = DOGE_TESTNET_PARAMS;
+
+    const P2PKH_VERSION_BYTE: u8 = 0x71;
+    const P2SH_VERSION_BYTE: u8 = 0xC4;
+    const PRIVATE_KEY_VERSION_BYTE: u8 = 0xF1;
+    const START_ADDRESS_STRING_CHAR: char = 'n';
+    const START_ADDRESS_STRING_BYTE: u8 = 0x6E;
 }
 
 #[derive(Clone, Copy, Default, Ord, PartialEq, Eq, PartialOrd)]
@@ -89,6 +109,12 @@ pub struct DogeRegTestConfig;
 impl DogeNetworkConfig for DogeRegTestConfig {
     const NETWORK_TYPE: DogeNetworkType = DogeNetworkType::RegTest;
     const NETWORK_PARAMS: DogeNetworkParams = DOGE_REGTEST_PARAMS;
+
+    const P2PKH_VERSION_BYTE: u8 = 0x6F;
+    const P2SH_VERSION_BYTE: u8 = 0xC4;
+    const PRIVATE_KEY_VERSION_BYTE: u8 = 0xEF;
+    const START_ADDRESS_STRING_CHAR: char = 'm';
+    const START_ADDRESS_STRING_BYTE: u8 = 0x6D;
 }
 
 

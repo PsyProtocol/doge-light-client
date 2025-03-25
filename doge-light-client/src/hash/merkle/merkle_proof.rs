@@ -87,8 +87,9 @@ impl<Hash: PartialEq + Copy> MerkleProofCore<Hash> {
     }
     pub fn verify_btc_block_tx_tree<Hasher: MerkleHasher<Hash>>(&self) -> bool {
         let mut current = self.value;
-        for (i, sibling) in self.siblings.iter().enumerate() {
-            if self.index & (1 << i) == 0 {
+        let mut index_tracker = self.index;
+        for sibling in self.siblings.iter() {
+            if (index_tracker & 1) == 0 {
                 current = Hasher::two_to_one(&current, sibling);
             } else {
                 if sibling.eq(&current) {
@@ -97,6 +98,11 @@ impl<Hash: PartialEq + Copy> MerkleProofCore<Hash> {
                 }
                 current = Hasher::two_to_one(sibling, &current);
             }
+            index_tracker >>= 1;
+        }
+        if index_tracker != 0 {
+            // wrong number of siblings
+            return false;
         }
         current == self.root
     }

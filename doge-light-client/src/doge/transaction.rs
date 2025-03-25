@@ -16,8 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Additional terms under GNU AGPL version 3 section 7:
 
-As permitted by section 7(b) of the GNU Affero General Public License, 
-you must retain the following attribution notice in all copies or 
+As permitted by section 7(b) of the GNU Affero General Public License,
+you must retain the following attribution notice in all copies or
 substantial portions of the software:
 
 "This software was created by QED (https://qedprotocol.com)
@@ -31,14 +31,12 @@ use serde::{Deserialize, Serialize};
 //use bitcoin::consensus::{deserialize_partial, serialize};
 //use bitcoin::VarInt;
 
-
 use crate::core_data::QHash256;
 use crate::hash::sha256::QBTCHash256Hasher;
 use crate::hash::traits::BytesHasher;
 
 use super::address::{AddressToBTCScript, BTCAddress160};
 use super::varuint::{decode_varuint_partial, encode_varuint, varuint_size};
-
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
@@ -50,10 +48,6 @@ pub struct BTCTransaction {
     pub locktime: u32,
 }
 
-
-
-
-
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(PartialEq, Clone, Debug, Eq, Ord, PartialOrd)]
@@ -61,9 +55,6 @@ pub struct BTCTransactionOutput {
     pub value: u64,
     pub script: Vec<u8>,
 }
-
-
-
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
@@ -73,7 +64,6 @@ pub struct BTCTransactionInputWithoutScript {
     pub index: u32,
     pub sequence: u32,
 }
-
 
 impl BTCTransactionInputWithoutScript {
     pub fn new(hash: QHash256, index: u32, sequence: u32) -> Self {
@@ -91,7 +81,6 @@ impl BTCTransactionInputWithoutScript {
         }
     }
 }
-
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
@@ -201,12 +190,12 @@ impl BTCTransaction {
         let extra = if (weight & 0b11) != 0 { 1u64 } else { 0u64 };
         (weight >> 2u64) + extra
     }
-    /* 
+    /*
     pub fn is_twm_spend_for_public_key(&self, expected_address: Hash160) -> bool {
         //let address = Hash160::from_bytes(&self.outputs[0].script[3..23]).unwrap();
         /*address == next_address
         && */
-        
+
         self.outputs[0].script.len() == 23
             && self.inputs[0].script.len() > BLOCK_SCRIPT_LENGTH
             && btc_hash160(
@@ -226,15 +215,73 @@ impl BTCTransaction {
             sequence: 4294967295,
         }
     }
+    // version, locktime, output
+    pub fn get_output_skip_decode(
+        bytes: &[u8],
+        start_offset: usize,
+        output_index: usize,
+    ) -> anyhow::Result<(u32, u32, BTCTransactionOutput)> {
+        if bytes.len() - start_offset < (32 + 4 + 4 + 1) {
+            return Err(anyhow::anyhow!("Invalid bytes length, too small"));
+        }
+        let mut read_index = start_offset;
+
+        let version = u32::from_le_bytes(bytes[read_index..(read_index + 4)].try_into().unwrap());
+        read_index += 4;
+
+        let inputs_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
+        read_index += inputs_len.1;
+
+        let inputs_size = inputs_len.0 as usize;
+        //let mut inputs = vec![];
+        for _ in 0..inputs_size {
+            let offset = BTCTransactionInput::skip_decode(bytes, read_index)?;
+            //inputs.push(input);
+            read_index = offset;
+        }
+
+        let outputs_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
+
+        read_index += outputs_len.1;
+        let outputs_size = outputs_len.0 as usize;
+        if output_index >= outputs_size {
+            return Err(anyhow::anyhow!("Invalid output index"));
+        }
+
+        for _ in 0..output_index {
+            let offset = BTCTransactionOutput::skip_decode(&bytes, read_index)?;
+            read_index = offset;
+        }
+        let (output, offset) = BTCTransactionOutput::from_bytes(&bytes, read_index)?;
+        read_index = offset;
+        for _ in (output_index + 1)..outputs_size {
+            let offset = BTCTransactionOutput::skip_decode(&bytes, offset)?;
+            read_index = offset;
+        }
+        let locktime = u32::from_le_bytes(bytes[read_index..(read_index + 4)].try_into().unwrap());
+        read_index += 4;
+
+        if read_index - start_offset != bytes.len() {
+            return Err(anyhow::anyhow!(
+                "Invalid bytes length, too large, {}, {}",
+                read_index - start_offset,
+                bytes.len()
+            ));
+        }
+
+        Ok((version, locktime, output))
+    }
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = vec![];
         bytes.extend(self.version.to_le_bytes());
-        let inputs_len = encode_varuint(self.inputs.len() as u64);//serialize(&VarInt(self.inputs.len() as u64));
+        let inputs_len = encode_varuint(self.inputs.len() as u64); //serialize(&VarInt(self.inputs.len() as u64));
         bytes.extend(inputs_len);
         for input in &self.inputs {
             bytes.extend(input.to_bytes());
         }
-        let outputs_len = encode_varuint(self.outputs.len() as u64);//serialize(&VarInt(self.outputs.len() as u64));
+        let outputs_len = encode_varuint(self.outputs.len() as u64); //serialize(&VarInt(self.outputs.len() as u64));
         bytes.extend(outputs_len);
         for output in &self.outputs {
             bytes.extend(output.to_bytes());
@@ -250,8 +297,11 @@ impl BTCTransaction {
 
         let version = u32::from_le_bytes(bytes[read_index..(read_index + 4)].try_into().unwrap());
         read_index += 4;
-        let inputs_len: (u64, usize) = decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}",e))?;
+
+        let inputs_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
         read_index += inputs_len.1;
+
         let inputs_size = inputs_len.0 as usize;
         let mut inputs = vec![];
         for _ in 0..inputs_size {
@@ -259,15 +309,20 @@ impl BTCTransaction {
             inputs.push(input);
             read_index = offset;
         }
-        let outputs_len: (u64, usize) = decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}",e))?;
+
+        let outputs_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
+
         read_index += outputs_len.1;
+
         let outputs_size = outputs_len.0 as usize;
         let mut outputs = vec![];
         for _ in 0..outputs_size {
-            let (output, offset) = BTCTransactionOutput::from_bytes(bytes.to_vec(), read_index)?;
+            let (output, offset) = BTCTransactionOutput::from_bytes(&bytes, read_index)?;
             outputs.push(output);
             read_index = offset;
         }
+
         let locktime = u32::from_le_bytes(bytes[read_index..(read_index + 4)].try_into().unwrap());
         Ok((
             Self {
@@ -292,7 +347,7 @@ impl BTCTransactionInput {
         let mut bytes = vec![];
         bytes.extend(&self.hash);
         bytes.extend(self.index.to_le_bytes());
-        let len = encode_varuint(self.script.len() as u64);//serialize(&VarInt(self.script.len() as u64));
+        let len = encode_varuint(self.script.len() as u64); //serialize(&VarInt(self.script.len() as u64));
         bytes.extend(len);
         bytes.extend(&self.script);
         bytes.extend(self.sequence.to_le_bytes());
@@ -304,12 +359,15 @@ impl BTCTransactionInput {
         }
         let mut read_index = offset;
 
-        let hash_bytes: [u8; 32] = bytes[read_index..(read_index + 32)].try_into().map_err(|e| anyhow::anyhow!("{:?}",e))?;
+        let hash_bytes: [u8; 32] = bytes[read_index..(read_index + 32)]
+            .try_into()
+            .map_err(|e| anyhow::anyhow!("{:?}", e))?;
         let hash = hash_bytes;
         read_index += 32;
         let index = u32::from_le_bytes(bytes[read_index..(read_index + 4)].try_into().unwrap());
         read_index += 4;
-        let script_len: (u64, usize) = decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}",e))?;
+        let script_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
         read_index += script_len.1;
         let script_size = script_len.0 as usize;
 
@@ -328,6 +386,29 @@ impl BTCTransactionInput {
             read_index,
         ))
     }
+    pub fn skip_decode(bytes: &[u8], offset: usize) -> anyhow::Result<usize> {
+        if bytes.len() - offset < (32 + 4 + 4 + 1) {
+            return Err(anyhow::anyhow!("Invalid bytes length"));
+        }
+        let mut read_index = offset;
+
+        //let hash_bytes: [u8; 32] = bytes[read_index..(read_index + 32)].try_into().map_err(|e| anyhow::anyhow!("{:?}",e))?;
+        //let hash = hash_bytes;
+        read_index += 32;
+        //let index = u32::from_le_bytes(bytes[read_index..(read_index + 4)].try_into().unwrap());
+        read_index += 4;
+        let script_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
+        read_index += script_len.1;
+        let script_size = script_len.0 as usize;
+
+        //let script = bytes[read_index..(read_index + script_size)].to_vec();
+        read_index += script_size;
+        //let sequence = u32::from_le_bytes(bytes[read_index..(read_index + 4)].try_into().unwrap());
+        read_index += 4;
+
+        Ok(read_index)
+    }
 }
 impl Default for BTCTransactionInput {
     fn default() -> Self {
@@ -344,12 +425,12 @@ impl BTCTransactionOutput {
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = vec![];
         bytes.extend(self.value.to_le_bytes());
-        let len = encode_varuint(self.script.len() as u64);//serialize(VarInt(self.script.len() as u64));
+        let len = encode_varuint(self.script.len() as u64); //serialize(VarInt(self.script.len() as u64));
         bytes.extend(len);
         bytes.extend(&self.script);
         bytes
     }
-    pub fn from_bytes(bytes: Vec<u8>, offset: usize) -> anyhow::Result<(Self, usize)> {
+    pub fn from_bytes(bytes: &[u8], offset: usize) -> anyhow::Result<(Self, usize)> {
         if bytes.len() - offset < (8 + 1) {
             return Err(anyhow::anyhow!("Invalid bytes length"));
         }
@@ -357,7 +438,8 @@ impl BTCTransactionOutput {
 
         let value = u64::from_le_bytes(bytes[read_index..(read_index + 8)].try_into().unwrap());
         read_index += 8;
-        let script_len: (u64, usize) = decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}",e))?;
+        let script_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
         read_index += script_len.1;
         let script_size = script_len.0 as usize;
 
@@ -365,6 +447,24 @@ impl BTCTransactionOutput {
         read_index += script_size;
 
         Ok((Self { value, script }, read_index))
+    }
+    pub fn skip_decode(bytes: &[u8], offset: usize) -> anyhow::Result<usize> {
+        if bytes.len() - offset < (8 + 1) {
+            return Err(anyhow::anyhow!("Invalid bytes length"));
+        }
+        let mut read_index = offset;
+
+        //let value = u64::from_le_bytes(bytes[read_index..(read_index + 8)].try_into().unwrap());
+        read_index += 8;
+        let script_len: (u64, usize) =
+            decode_varuint_partial(&bytes[read_index..]).map_err(|e| anyhow::anyhow!("{:?}", e))?;
+        read_index += script_len.1;
+        let script_size = script_len.0 as usize;
+
+        //let script = bytes[read_index..(read_index + script_size)].to_vec();
+        read_index += script_size;
+
+        Ok(read_index)
     }
 
     pub fn blank() -> Self {
@@ -374,16 +474,28 @@ impl BTCTransactionOutput {
         }
     }
     pub fn is_p2pkh_output(&self) -> bool {
-        self.script.len() == 25 && self.script[0] == 0x76 && self.script[1] == 0xa9 && self.script[2] == 0x14 && self.script[23] == 0x88 && self.script[24] == 0xac
+        self.script.len() == 25
+            && self.script[0] == 0x76
+            && self.script[1] == 0xa9
+            && self.script[2] == 0x14
+            && self.script[23] == 0x88
+            && self.script[24] == 0xac
     }
     pub fn is_p2sh_output(&self) -> bool {
-        self.script.len() == 23 && self.script[0] == 0xa9 && self.script[1] == 0x14 && self.script[22] == 0x87
+        self.script.len() == 23
+            && self.script[0] == 0xa9
+            && self.script[1] == 0x14
+            && self.script[22] == 0x87
     }
     pub fn get_output_address(&self) -> anyhow::Result<BTCAddress160> {
         if self.is_p2pkh_output() {
-            Ok(BTCAddress160::new_p2pkh(self.script[3..23].try_into().unwrap()))
+            Ok(BTCAddress160::new_p2pkh(
+                self.script[3..23].try_into().unwrap(),
+            ))
         } else if self.is_p2sh_output() {
-            Ok(BTCAddress160::new_p2sh(self.script[2..22].try_into().unwrap()))
+            Ok(BTCAddress160::new_p2sh(
+                self.script[2..22].try_into().unwrap(),
+            ))
         } else {
             Err(anyhow::anyhow!("could not find address in output script"))
         }
@@ -405,7 +517,6 @@ mod tests {
     };
 
     use super::BTCTransaction;
-
 
     fn get_example_raw_txs() -> Vec<Vec<u8>> {
         vec![

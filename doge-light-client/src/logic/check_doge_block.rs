@@ -25,7 +25,7 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 use crate::{
-    constants::DogeNetworkConfig, core_data::{QDogeBlockHeader, QHash256}, error::{DogeBridgeError, QDogeResult}, network_params::DogeNetworkType
+    constants::DogeNetworkConfig, core_data::{QDogeBlockHeader, QHash256}, error::{DogeBridgeError, QDogeResult}
 };
 
 use super::check_doge_block_seq::{check_proof_of_work, get_next_work_required};

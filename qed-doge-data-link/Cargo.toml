@@ -20,6 +20,7 @@ bitcoin = { git = "https://github.com/QEDProtocol/rust-dogecoin", rev = "9b52ed2
 anyhow = { version = "1.0.75", default-features = false, features = [] }
 
 doge-light-client = { path = "../doge-light-client", default-features = false, features = ["sha2", "serde", "borsh", "bitcoin", "std"] }
+qed-doge-bridge-helper = { path = "../qed-doge-bridge-helper", default-features = false, features = ["borsh"] }
 
 
 ureq = "3.0.9"
