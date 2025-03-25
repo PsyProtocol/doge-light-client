@@ -1004,6 +1004,7 @@ dependencies = [
  "qed-doge-macros",
  "rand 0.8.5",
  "rand_core 0.6.4",
+ "solana-program",
  "thiserror",
 ]
 

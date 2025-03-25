@@ -109,51 +109,24 @@ pub enum ClaimDogeBridgeHelperError {
 
     #[error("Block not yet finalized")]
     BlockNotFinalized = 610,
-    
-    #[error("Aux POW missing chain merkle root in parent coinbase")]
-    AuxPowCoinbaseMissingChainMerkleRoot = 611,
-    #[error("MERGED_MINING_HEADER found twice in coinbase transaction input script")]
-    MergedMiningHeaderFoundTwiceInCoinbase = 612,
-    #[error("MERGED_MINING_HEADER not found at the beginning of the coinbase transaction input script")]
-    MergedMiningHeaderNotFoundAtCoinbaseScriptStart = 613,
-    #[error("chain merkle root starts too late in the coinbase transaction input script")]
-    AuxPowChainMerkleRootTooLateInCoinbaseInputScript = 614,
-    #[error("coinbase transaction input script is too short")]
-    AuxPowCoinbaseTransactionInputScriptTooShort = 615,
-    #[error("n_size in coinbase script does not correspond to the number of leaves of the merkle tree implictly defined by the blockchain branch hashes length")]
-    AuxPowCoinbaseScriptInvalidNSize = 616,
-    #[error("the sidemask provided in blockchain branch does not match the one computed from the coinbase transaction script")]
-    AuxPowCoinbaseScriptInvalidSideMask = 617,
-    #[error("InvalidReadableAccount")]
-    InvalidReadableAccountExample = 618,
-    #[error("PermissionViolation")]
-    PermissionViolationExample = 619,
-    #[error("NeedsSuccesfulAggregation")]
-    NeedsSuccesfulAggregationExample = 620,
-    #[error("MaxLastFeedIndexReached")]
-    MaxLastFeedIndexReachedExample = 621,
-    #[error("FeedIndexAlreadyInitialized")]
-    FeedIndexAlreadyInitializedExample = 622,
-    #[error("NoNeedToResize")]
-    NoNeedToResizeExample = 623,
 }
 
 
 #[cfg(feature = "solprogram")]
-impl solana_program::program_error::PrintProgramError for DogeBridgeError {
+impl solana_program::program_error::PrintProgramError for ClaimDogeBridgeHelperError {
     fn print<E>(&self) {
         solana_program::msg!(&self.to_string());
     }
 }
 #[cfg(feature = "solprogram")]
-impl From<DogeBridgeError> for solana_program::program_error::ProgramError {
-    fn from(e: DogeBridgeError) -> Self {
+impl From<ClaimDogeBridgeHelperError> for solana_program::program_error::ProgramError {
+    fn from(e: ClaimDogeBridgeHelperError) -> Self {
         solana_program::program_error::ProgramError::Custom(e as u32)
     }
 }
 
 #[cfg(feature = "solprogram")]
-impl<T> solana_program::decode_error::DecodeError<T> for DogeBridgeError {
+impl<T> solana_program::decode_error::DecodeError<T> for ClaimDogeBridgeHelperError {
     fn type_of() -> &'static str {
         "Doge Bridge Error"
     }

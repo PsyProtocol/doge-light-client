@@ -6,8 +6,8 @@ edition = "2024"
 [features]
 borsh = []
 serde = []
-solprogram = []
-default = ["borsh"]
+solprogram = ["dep:solana-program"]
+default = ["borsh", "solprogram"]
 
 [dependencies]
 borsh = { version = "0.10.4" }
@@ -19,6 +19,7 @@ num-derive = "^0.3"
 num-traits = "^0.2"
 anyhow = { version = "1.0.75", default-features = false, features = [] }
 
+solana-program = { version = "~2.1", optional = true }
 
 [dev-dependencies]
 rand = "0.8"
