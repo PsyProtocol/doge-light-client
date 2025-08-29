@@ -24,7 +24,7 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map::Entry};
 
 use doge_light_client::core_data::QDogeBlock;
 use serde::{Deserialize, Serialize};
@@ -52,12 +52,16 @@ impl BlockFetcher {
         }
     }
     pub fn get_block(&mut self, height: u32) -> anyhow::Result<QDogeBlock> {
-        if let Some(block) = self.store.get(&height) {
-            return Ok(block.clone());
+        match self.store.entry(height) {
+            Entry::Occupied(entry) => {
+                return Ok(entry.get().clone());
+            }
+            Entry::Vacant(entry) => {
+                let block = self.client.get_qdoge_block(height as u32)?;
+                entry.insert(block.clone());
+                return Ok(block);
+            }
         }
-        let block = self.client.get_qdoge_block(height as u32)?;
-        self.store.insert(height, block.clone());
-        Ok(block)
     }
 
     pub fn get_blocks(&mut self, heights: &[u32]) -> anyhow::Result<Vec<QDogeBlock>> {
