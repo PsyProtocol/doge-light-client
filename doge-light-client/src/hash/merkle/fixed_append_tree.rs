@@ -31,8 +31,7 @@ use borsh::{BorshSerialize, BorshDeserialize};
 use serde::{Serialize, Deserialize};
 
 #[cfg(feature = "serde")]
-use serde_with::serde_as;
-
+use crate::serde_array::serde_arrays;
 
 
 use zerocopy::little_endian::U64;
@@ -65,12 +64,11 @@ pub struct FixedMerkleAppendTree<Hash: PartialEq + Copy, const HEIGHT: usize> {
 
 #[cfg(feature = "serde")]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
-#[serde_as]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, Serialize, Deserialize)]
 #[serde(bound = "for<'de2> Hash: Deserialize<'de2>")]
 struct SerFixedMerkleAppendTree<Hash: PartialEq + Copy + Serialize, const HEIGHT: usize> {
     pub next_index: U64,
-    #[serde_as(as = "[_; HEIGHT]")]
+    #[serde(with = "serde_arrays")]
     pub levels: [MerkleAppendTreeLevel<Hash>; HEIGHT],
 }
 
