@@ -57,6 +57,7 @@ impl BlockHeaderFetcher {
             return Ok(header.clone());
         }
         let header = self.client.get_qd_block(height as u32)?.to_qdoge_block_header();
+        println!("fetched block header at height {}:\n{}", height, hex::encode(borsh::to_vec(&header)?));
         self.store.insert(height, header.clone());
         Ok(header)
     }

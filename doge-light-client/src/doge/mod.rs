@@ -27,3 +27,4 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 pub mod transaction;
 pub mod varuint;
 pub mod address;
+pub mod coinbase_transaction;

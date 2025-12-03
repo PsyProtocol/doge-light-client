@@ -30,7 +30,7 @@ use borsh::{BorshSerialize, BorshDeserialize};
 use serde::{Serialize, Deserialize};
 
 #[cfg(feature = "serde")]
-use serde_with::serde_as;
+use crate::serde_array::serde_arrays;
 
 use zerocopy::little_endian::{U16, U32};
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes, Unaligned};
@@ -63,13 +63,12 @@ pub struct PoWBlockContext {
 
 #[cfg(feature = "serde")]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
-#[serde_as]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, Serialize, Deserialize, IntoBytes, Immutable, Unaligned)]
 #[repr(C)]
 pub struct BlockDataTracker<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize> {
     pub tip_block_number: U32,
     pub tip_internal_index: U16,
-    #[serde_as(as = "[_; QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE]")]
+    #[serde(with = "serde_arrays")]
     pub records: [BlockDataRecord; QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE],
 }
 

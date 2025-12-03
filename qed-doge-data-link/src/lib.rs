@@ -23,7 +23,7 @@ substantial portions of the software:
 "This software was created by QED (https://qedprotocol.com)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
-
+pub mod bitcoin_convert;
 pub mod traits;
 pub mod electrs_link;
 pub mod block_cache;

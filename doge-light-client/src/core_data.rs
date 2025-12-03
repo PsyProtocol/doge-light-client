@@ -16,8 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Additional terms under GNU AGPL version 3 section 7:
 
-As permitted by section 7(b) of the GNU Affero General Public License, 
-you must retain the following attribution notice in all copies or 
+As permitted by section 7(b) of the GNU Affero General Public License,
+you must retain the following attribution notice in all copies or
 substantial portions of the software:
 
 "This software was created by QED (https://qedprotocol.com)
@@ -25,19 +25,25 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 #[cfg(feature = "borsh")]
-use borsh::{BorshSerialize, BorshDeserialize};
+use borsh::{BorshDeserialize, BorshSerialize};
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
-
+use serde::{Deserialize, Serialize};
 
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes};
 
 use crate::{
-    constants::{DogeNetworkConfig, MERGED_MINING_HEADER, VERSION_AUXPOW}, doge::transaction::BTCTransaction, error::{DogeBridgeError, QDogeResult}, hash::{
+    constants::{DogeNetworkConfig, MERGED_MINING_HEADER, VERSION_AUXPOW},
+    doge::{
+        coinbase_transaction::DogeAuxPowCoinbaseTransaction,
+        transaction::BTCTransaction,
+        varuint::{decode_varuint_partial, encode_varuint, varuint_size},
+    },
+    error::{DogeBridgeError, QDogeResult},
+    hash::{
         scrypt_doge::scrypt_1024_1_1_256,
         sha256::QBTCHash256Hasher,
         traits::{BytesHasher, MerkleHasher},
-    }
+    },
 };
 
 pub type QHash256 = [u8; 32];
@@ -60,10 +66,11 @@ fn find_in_array(data: &[u8], search_sub_array: &[u8]) -> Option<usize> {
 }
 // Return
 
-
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
-#[derive(Copy, Clone, Debug, Default, PartialEq, PartialOrd, Eq, Ord, FromBytes, IntoBytes, Immutable)]
+#[derive(
+    Copy, Clone, Debug, Default, PartialEq, PartialOrd, Eq, Ord, FromBytes, IntoBytes, Immutable,
+)]
 pub struct QStandardBlockHeader {
     pub version: u32,
     pub previous_block_hash: QHash256,
@@ -72,7 +79,6 @@ pub struct QStandardBlockHeader {
     pub bits: u32,
     pub nonce: u32,
 }
-
 
 impl QStandardBlockHeader {
     pub fn to_bytes_fixed(&self) -> [u8; 80] {
@@ -139,7 +145,6 @@ impl QStandardBlockHeader {
     }
 }
 
-
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
@@ -158,14 +163,47 @@ impl QMerkleBranch {
         }
         cur
     }
+    pub fn to_consensus_bytes(&self) -> Vec<u8> {
+        let count = self.hashes.len() as u64;
+        let mut v = Vec::with_capacity(varuint_size(count) + count as usize * 32 + 4);
+        v.extend_from_slice(&encode_varuint(count));
+        for h in self.hashes.iter() {
+            v.extend_from_slice(h);
+        }
+        v.extend_from_slice(&self.side_mask.to_le_bytes());
+        v
+    }
+    pub fn decode_consensus_bytes(data: &[u8]) -> anyhow::Result<(Self, usize)> {
+        let mut offset = 0;
+        let count = {
+            let (v, size) = decode_varuint_partial(&data[offset..])
+                .map_err(|e| anyhow::anyhow!("error decoding QMerkleBranch: {}", e))?;
+            offset += size;
+            v
+        };
+        let mut hashes = Vec::with_capacity(count as usize);
+        for _ in 0..count {
+            if data.len() < offset + 32 {
+                anyhow::bail!("error decoding QMerkleBranch: not enough data for hash");
+            }
+            let h: QHash256 = data[offset..offset + 32].try_into().unwrap();
+            hashes.push(h);
+            offset += 32;
+        }
+        if data.len() < offset + 4 {
+            anyhow::bail!("error decoding QMerkleBranch: not enough data for side_mask");
+        }
+        let side_mask = u32::from_le_bytes(data[offset..offset + 4].try_into().unwrap());
+        offset += 4;
+        Ok((Self { hashes, side_mask }, offset))
+    }
 }
-
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub struct QAuxPow {
-    pub coinbase_transaction: BTCTransaction,
+    pub coinbase_transaction: DogeAuxPowCoinbaseTransaction,
     pub block_hash: QHash256,
     pub coinbase_branch: QMerkleBranch,
     pub blockchain_branch: QMerkleBranch,
@@ -189,18 +227,68 @@ pub fn get_expected_index(n_nonce: u32, n_chain_id: i32, h: u32) -> u32 {
     merkle branch length), so that 32 bits are enough for the computation.  */
 
     let mut r = n_nonce;
-    r = r.wrapping_mul(1103515245).wrapping_add(12345).wrapping_add(n_chain_id as u32);
+    r = r
+        .wrapping_mul(1103515245)
+        .wrapping_add(12345)
+        .wrapping_add(n_chain_id as u32);
     r = r.wrapping_mul(1103515245).wrapping_add(12345);
 
     return r % (1 << h);
 }
 
 impl QAuxPow {
+    pub fn decode_consensus_bytes(data: &[u8]) -> anyhow::Result<(Self, usize)> {
+        let (coinbase_transaction, mut offset) =
+            DogeAuxPowCoinbaseTransaction::from_bytes_offset(&data, 0).map_err(|e| {
+                anyhow::anyhow!("error decoding QAuxPow coinbase_transaction: {}", e)
+            })?;
+
+        if data.len() < offset + 32 {
+            anyhow::bail!("error decoding QAuxPow: not enough data for block_hash");
+        }
+        let block_hash: QHash256 = data[offset..offset + 32].try_into().unwrap();
+        offset += 32;
+
+        let (coinbase_branch, size_cb) = QMerkleBranch::decode_consensus_bytes(&data[offset..])
+            .map_err(|e| anyhow::anyhow!("error decoding QAuxPow coinbase_branch: {}", e))?;
+        offset += size_cb;
+
+        let (blockchain_branch, size_bb) =
+            QMerkleBranch::decode_consensus_bytes(&data[offset..])
+                .map_err(|e| anyhow::anyhow!("error decoding QAuxPow blockchain_branch: {}", e))?;
+        offset += size_bb;
+        if offset + 80 > data.len() {
+            anyhow::bail!("error decoding QAuxPow: not enough data for parent_block");
+        }
+
+        let parent_block = QStandardBlockHeader::from_bytes(&data[offset..])
+            .map_err(|e| anyhow::anyhow!("error decoding QAuxPow parent_block: {}", e))?;
+        offset += 80;
+
+        Ok((
+            Self {
+                coinbase_transaction,
+                block_hash,
+                coinbase_branch,
+                blockchain_branch,
+                parent_block,
+            },
+            offset,
+        ))
+    }
+    pub fn to_consensus_bytes(&self) -> Vec<u8> {
+        let mut v = Vec::new();
+        v.extend_from_slice(&self.coinbase_transaction.to_bytes(true));
+        v.extend_from_slice(&self.block_hash);
+        v.extend_from_slice(&self.coinbase_branch.to_consensus_bytes());
+        v.extend_from_slice(&self.blockchain_branch.to_consensus_bytes());
+        v.extend_from_slice(&self.parent_block.to_bytes_fixed());
+        v
+    }
     pub fn check<NC: DogeNetworkConfig>(&self, hash_aux_block: QHash256, chain_id: u32) -> bool {
         if self.coinbase_branch.side_mask == 0
             && self.blockchain_branch.hashes.len() <= 30
-            && (!NC::NETWORK_PARAMS.strict_chain_id
-                || self.parent_block.get_chain_id() == chain_id)
+            && (!NC::NETWORK_PARAMS.strict_chain_id || self.parent_block.get_chain_id() == chain_id)
         {
             let n_root_hash = self
                 .blockchain_branch
@@ -262,13 +350,16 @@ impl QAuxPow {
         }
         false
     }
-    pub fn check_err<NC: DogeNetworkConfig>(&self, hash_aux_block: QHash256, chain_id: u32) -> QDogeResult<()> {
+    pub fn check_err<NC: DogeNetworkConfig>(
+        &self,
+        hash_aux_block: QHash256,
+        chain_id: u32,
+    ) -> QDogeResult<()> {
         if self.coinbase_branch.side_mask != 0 {
             return Err(DogeBridgeError::AuxPowCoinBaseBranchSideMaskNonZero);
         } else if self.blockchain_branch.hashes.len() > 30 {
             return Err(DogeBridgeError::AuxPowChainMerkleBranchTooLong);
-        } else if NC::NETWORK_PARAMS.strict_chain_id
-            && self.parent_block.get_chain_id() == chain_id
+        } else if NC::NETWORK_PARAMS.strict_chain_id && self.parent_block.get_chain_id() == chain_id
         {
             return Err(DogeBridgeError::AuxPowParentHasOurChainId);
         }
@@ -302,7 +393,12 @@ impl QAuxPow {
 
         if pc_head.is_some() {
             let pc_head = pc_head.unwrap();
-            if find_in_array(&script[(pc_head+MERGED_MINING_HEADER.len())..], &MERGED_MINING_HEADER).is_some() {
+            if find_in_array(
+                &script[(pc_head + MERGED_MINING_HEADER.len())..],
+                &MERGED_MINING_HEADER,
+            )
+            .is_some()
+            {
                 return Err(DogeBridgeError::MergedMiningHeaderFoundTwiceInCoinbase);
             } else if pc_head + MERGED_MINING_HEADER.len() != pc {
                 return Err(DogeBridgeError::MergedMiningHeaderNotFoundAtCoinbaseScriptStart);
@@ -341,6 +437,27 @@ impl QAuxPow {
 pub struct QDogeBlockHeader {
     pub header: QStandardBlockHeader,
     pub aux_pow: Option<QAuxPow>,
+}
+
+impl QDogeBlockHeader {
+    pub fn to_consensus_bytes(&self) -> Vec<u8> {
+        let mut v = Vec::with_capacity(80 + 1);
+        v.extend_from_slice(&self.header.to_bytes_fixed());
+        match &self.aux_pow {
+            Some(aux) => {
+                v.extend_from_slice(&aux.to_consensus_bytes());
+            }
+            None => {}
+        }
+        v
+    }
+    pub fn get_hash(&self) -> QHash256 {
+        self.header.get_hash()
+    }
+
+    pub fn get_pow_hash(&self) -> QHash256 {
+        self.header.get_pow_hash()
+    }
 }
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
