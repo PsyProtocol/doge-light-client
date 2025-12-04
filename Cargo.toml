@@ -5,11 +5,7 @@ members = [
     "doge-light-client",
     "psy-doge-bridge-helper",
     "psy-doge-macros",
-    "doge-bridge-block-state",
-    "psy_io",
-    "psy_serialize",
-    "pderive",
-    "pser"
+    "doge-bridge-block-state"
 
 ]
 
@@ -51,8 +47,3 @@ embedded-io-async = "0.7.0"
 async-trait = { version = "0.1.88" }
 
 doge-light-client = { path = "./doge-light-client" }
-psy_serialize = { path = "./psy_serialize" }
-psy_io = { path = "./psy_io" }
-
-pderive = { path = "./pderive" }
-pser = { path = "./pser" }

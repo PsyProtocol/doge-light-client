@@ -10,8 +10,7 @@ serialize_serde = ["dep:serde", "dep:serde_with", "zerocopy/serde"]
 bitcoin = ["dep:bitcoin", "serialize_serde"]
 solprogram = ["dep:solana-program"]
 sha2 = ["dep:sha2"]
-std = ["psy_io/std", "psy_serialize/std"]
-serialize_psy = ["dep:psy_serialize", "dep:psy_io"]
+std = []
 
 serialize_speedy = ["dep:speedy"]
 serialize_bytemuck = ["dep:bytemuck"]
@@ -19,10 +18,6 @@ serialize_bytemuck = ["dep:bytemuck"]
 [dependencies]
 serde = { workspace = true, optional = true }
 serde_with = { workspace = true, optional = true }
-psy_io = { workspace = true, optional = true }
-psy_serialize = { workspace = true, optional = true }
-pderive = { workspace = true }
-pser = { workspace = true }
 bs58 = { workspace = true }
 ripemd = { workspace = true }
 scrypt = { workspace = true }

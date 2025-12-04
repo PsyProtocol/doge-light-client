@@ -522,10 +522,6 @@ dependencies = [
  "hex-literal",
  "num-derive 0.3.3",
  "num-traits",
- "pderive",
- "pser",
- "psy_io",
- "psy_serialize",
  "rand 0.8.5",
  "rand_core 0.6.4",
  "ripemd",
@@ -538,21 +534,6 @@ dependencies = [
  "thiserror",
  "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
  "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
-]
-
-[[package]]
-name = "embedded-io"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9eb1aa714776b75c7e67e1da744b81a129b3ff919c8712b5e1b32252c1f07cc7"
-
-[[package]]
-name = "embedded-io-async"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2564b9f813c544241430e147d8bc454815ef9ac998878d30cc3055449f7fd4c0"
-dependencies = [
- "embedded-io",
 ]
 
 [[package]]
@@ -984,12 +965,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "paste"
-version = "1.0.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
-
-[[package]]
 name = "pbkdf2"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -997,15 +972,6 @@ checksum = "f8ed6a7761f76e3b9f92dfb0a60a6a6477c61024b775147ff0973a02653abaf2"
 dependencies = [
  "digest 0.10.7",
  "hmac",
-]
-
-[[package]]
-name = "pderive"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.100",
 ]
 
 [[package]]
@@ -1055,10 +1021,6 @@ checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
 dependencies = [
  "unicode-ident",
 ]
-
-[[package]]
-name = "pser"
-version = "0.1.0"
 
 [[package]]
 name = "psy-doge-bridge-helper"
@@ -1114,25 +1076,6 @@ dependencies = [
 [[package]]
 name = "psy-doge-macros"
 version = "0.1.0"
-
-[[package]]
-name = "psy_io"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "embedded-io",
- "embedded-io-async",
-]
-
-[[package]]
-name = "psy_serialize"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bytemuck",
- "paste",
- "psy_io",
-]
 
 [[package]]
 name = "quote"
