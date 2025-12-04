@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 Zero Knowledge Labs Limited, QED Protocol
+Copyright (C) 2025 Zero Knowledge Labs Limited, Psy Protocol
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,14 +20,14 @@ As permitted by section 7(b) of the GNU Affero General Public License,
 you must retain the following attribution notice in all copies or 
 substantial portions of the software:
 
-"This software was created by QED (https://qedprotocol.com)
+"This software was created by Psy Protocol (https://psy.xyz)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 
 /*
 use doge_light_client::{
-    block_data_tracker::BlockDataTracker, chain_state::QEDDogeChainStateCore, core_data::QHash256,
+    block_data_tracker::BlockDataTracker, chain_state::QEDDogeChainStateCore, common_types::QHash256,
     hash::merkle::fixed_append_tree::FixedMerkleAppendTree,
 };
  

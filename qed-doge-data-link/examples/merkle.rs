@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 Zero Knowledge Labs Limited, QED Protocol
+Copyright (C) 2025 Zero Knowledge Labs Limited, Psy Protocol
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,13 +20,13 @@ As permitted by section 7(b) of the GNU Affero General Public License,
 you must retain the following attribution notice in all copies or 
 substantial portions of the software:
 
-"This software was created by QED (https://qedprotocol.com)
+"This software was created by Psy Protocol (https://psy.xyz)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 
 use qed_doge_data_link::{electrs_link::DogeLinkElectrsClient, traits::QDogeBlockHeaderFetcher, wrapped_hash_256::WrappedHash256};
-use doge_light_client::{core_data::QHash256, hash::sha256::QBTCHash256Hasher, network_params::DogeNetworkType};
+use doge_light_client::{common_types::QHash256, hash::sha256::QBTCHash256Hasher, network_params::DogeNetworkType};
 fn run_merkle_test(
     txids: &[QHash256],
     client: DogeLinkElectrsClient,

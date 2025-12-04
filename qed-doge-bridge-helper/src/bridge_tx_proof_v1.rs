@@ -1,5 +1,5 @@
 use doge_light_client::{
-    chain_state::QEDDogeChainStateCore, core_data::QHash256, doge::transaction::BTCTransaction, hash::sha256_impl::hash_impl_sha256_bytes
+    chain_state::QEDDogeChainStateCore, common_types::{QHash160, QHash256}, doge::transaction::BTCTransaction, hash::sha256_impl::hash_impl_sha256_bytes
 };
 
 use crate::{
@@ -12,11 +12,11 @@ const MIN_POSSIBLE_TX_SIZE: usize = 60;
 const MAX_REASONABLE_TX_SIZE: usize = 1024 * 1024 * 10;
 
 fn compute_merkle_in_mem_btc_has256(
-    value: [u8; 32],
+    value: QHash256,
     siblings: &[u8],
     index: u32,
     siblings_count: usize,
-) -> [u8; 32] {
+) -> QHash256 {
     assert!(siblings.len() <= 32 * siblings_count);
 
     let mut current = value;
@@ -39,11 +39,11 @@ fn compute_merkle_in_mem_btc_has256(
 }
 
 fn compute_merkle_in_mem_sha256(
-    value: [u8; 32],
+    value: QHash256,
     siblings: &[u8],
     index: u64,
     siblings_count: usize,
-) -> [u8; 32] {
+) -> QHash256 {
     assert!(siblings.len() <= 32 * siblings_count);
 
     let mut current = value;
@@ -158,7 +158,7 @@ impl UserClaimStateProofV1 {
         tx_index: u32,
         output_index: u32,
         ibc: &QEDDogeChainStateCore<QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE, QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS, QDOGE_BRIDGE_BLOCK_TREE_HEIGHT>,
-        known_user_claim_merkle_hash: &[u8; 32],
+        known_user_claim_merkle_hash: &QHash256,
         data: &'a [u8],
     ) -> QClaimDogeResult<(QHash256, u64)> {
         if ibc.block_data_tracker.get_finalized_block_number() < block_number {
@@ -189,8 +189,8 @@ impl UserClaimStateProofV1 {
         block_number: u32,
         tx_index: u32,
         output_index: u32,
-        known_block_tx_merkle_root: &[u8; 32],
-        known_user_claim_merkle_hash: &[u8; 32],
+        known_block_tx_merkle_root: &QHash256,
+        known_user_claim_merkle_hash: &QHash256,
         data: &'a [u8],
     ) -> QClaimDogeResult<(QHash256, u64)> {
         let (_, tx_bytes, read_length) =
@@ -361,7 +361,7 @@ impl TransactionInBlockProofV1 {
         tx_data: &[u8],
         output_index: usize,
         solana_public_key: &[u8; 32],
-        bridge_public_key_hash: &[u8; 20],
+        bridge_public_key_hash: &QHash160,
     ) -> QClaimDogeResult<u64> {
         match BTCTransaction::get_output_skip_decode(tx_data, 0, output_index) {
             Ok((version, locktime, output)) => {

@@ -1,4 +1,4 @@
-use doge_light_client::{core_data::QHash256, hash::merkle::merkle_proof::MerkleProofCore};
+use doge_light_client::{common_types::QHash256, hash::merkle::merkle_proof::MerkleProofCore};
 use hex::FromHexError;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 Zero Knowledge Labs Limited, QED Protocol
+Copyright (C) 2025 Zero Knowledge Labs Limited, Psy Protocol
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,12 +20,12 @@ As permitted by section 7(b) of the GNU Affero General Public License,
 you must retain the following attribution notice in all copies or 
 substantial portions of the software:
 
-"This software was created by QED (https://qedprotocol.com)
+"This software was created by Psy Protocol (https://psy.xyz)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 use crate::{
-    constants::DogeNetworkConfig, core_data::QHash256, math::btc_difficulty::BTCDifficulty
+    constants::DogeNetworkConfig, common_types::QHash256, math::btc_difficulty::BTCDifficulty
 };
 
 fn allow_min_difficulty_for_block<NC: DogeNetworkConfig>(current_block_time: i64, last_block_time: i64) -> bool {

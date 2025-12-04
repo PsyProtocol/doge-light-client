@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 Zero Knowledge Labs Limited, QED Protocol
+Copyright (C) 2025 Zero Knowledge Labs Limited, Psy Protocol
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,7 +20,7 @@ As permitted by section 7(b) of the GNU Affero General Public License,
 you must retain the following attribution notice in all copies or
 substantial portions of the software:
 
-"This software was created by QED (https://qedprotocol.com)
+"This software was created by Psy Protocol (https://psy.xyz)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
@@ -32,22 +32,17 @@ use serde::{Deserialize, Serialize};
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes};
 
 use crate::{
-    constants::{DogeNetworkConfig, MERGED_MINING_HEADER, VERSION_AUXPOW},
-    doge::{
+    common_types::QHash256, constants::{DogeNetworkConfig, MERGED_MINING_HEADER, VERSION_AUXPOW}, doge::{
         coinbase_transaction::DogeAuxPowCoinbaseTransaction,
         transaction::BTCTransaction,
         varuint::{decode_varuint_partial, encode_varuint, varuint_size},
-    },
-    error::{DogeBridgeError, QDogeResult},
-    hash::{
+    }, error::{DogeBridgeError, QDogeResult}, hash::{
         scrypt_doge::scrypt_1024_1_1_256,
         sha256::QBTCHash256Hasher,
         traits::{BytesHasher, MerkleHasher},
-    },
+    }
 };
 
-pub type QHash256 = [u8; 32];
-pub type QHash160 = [u8; 20];
 fn find_in_array(data: &[u8], search_sub_array: &[u8]) -> Option<usize> {
     // If the sub-array is empty, return None
     if search_sub_array.is_empty() || data.len() < search_sub_array.len() {
@@ -94,8 +89,8 @@ impl QStandardBlockHeader {
     }
     pub fn from_bytes_fixed(data: &[u8; 80]) -> Self {
         let version = u32::from_le_bytes(data[0..4].try_into().unwrap());
-        let previous_block_hash: [u8; 32] = data[4..36].try_into().unwrap();
-        let merkle_root: [u8; 32] = data[36..68].try_into().unwrap();
+        let previous_block_hash: QHash256 = data[4..36].try_into().unwrap();
+        let merkle_root: QHash256 = data[36..68].try_into().unwrap();
         let timestamp = u32::from_le_bytes(data[68..72].try_into().unwrap());
         let bits = u32::from_le_bytes(data[72..76].try_into().unwrap());
         let nonce = u32::from_le_bytes(data[76..80].try_into().unwrap());
@@ -117,8 +112,8 @@ impl QStandardBlockHeader {
             );
         }
         let version = u32::from_le_bytes(data[0..4].try_into().unwrap());
-        let previous_block_hash: [u8; 32] = data[4..36].try_into().unwrap();
-        let merkle_root: [u8; 32] = data[36..68].try_into().unwrap();
+        let previous_block_hash: QHash256 = data[4..36].try_into().unwrap();
+        let merkle_root: QHash256 = data[36..68].try_into().unwrap();
         let timestamp = u32::from_le_bytes(data[68..72].try_into().unwrap());
         let bits = u32::from_le_bytes(data[72..76].try_into().unwrap());
         let nonce = u32::from_le_bytes(data[76..80].try_into().unwrap());

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 Zero Knowledge Labs Limited, QED Protocol
+Copyright (C) 2025 Zero Knowledge Labs Limited, Psy Protocol
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,7 +20,7 @@ As permitted by section 7(b) of the GNU Affero General Public License,
 you must retain the following attribution notice in all copies or 
 substantial portions of the software:
 
-"This software was created by QED (https://qedprotocol.com)
+"This software was created by Psy Protocol (https://psy.xyz)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
@@ -35,7 +35,7 @@ use crate::serde_array::serde_arrays;
 use zerocopy::little_endian::{U16, U32};
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes, Unaligned};
 
-use crate::{core_data::QHash256, error::{DogeBridgeError, QDogeResult}};
+use crate::{common_types::QHash256, error::{DogeBridgeError, QDogeResult}};
 
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

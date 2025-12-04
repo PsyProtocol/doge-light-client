@@ -479,6 +479,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "doge-bridge-block-state"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bitcoin",
+ "borsh 0.10.4",
+ "bs58",
+ "doge-light-client",
+ "hex",
+ "hex-literal",
+ "num-derive 0.3.3",
+ "num-traits",
+ "rand 0.8.5",
+ "rand_core 0.6.4",
+ "ripemd",
+ "scrypt",
+ "serde",
+ "serde_with",
+ "sha2 0.10.8",
+ "solana-program",
+ "thiserror",
+ "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
+ "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
+]
+
+[[package]]
 name = "doge-light-client"
 version = "0.1.0"
 dependencies = [

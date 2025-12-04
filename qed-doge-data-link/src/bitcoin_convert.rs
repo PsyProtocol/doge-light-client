@@ -1,7 +1,8 @@
 use bitcoin::{block::SimpleHeader, hashes::Hash, Block};
 use doge_light_client::{
+    common_types::QHash256,
     core_data::{
-        QAuxPow, QDogeBlock, QDogeBlockHeader, QHash256, QMerkleBranch, QStandardBlockHeader,
+        QAuxPow, QDogeBlock, QDogeBlockHeader, QMerkleBranch, QStandardBlockHeader,
     },
     doge::{coinbase_transaction::DogeAuxPowCoinbaseTransaction, transaction::BTCTransaction},
 };

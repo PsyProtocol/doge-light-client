@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2025 Zero Knowledge Labs Limited, QED Protocol
+Copyright (C) 2025 Zero Knowledge Labs Limited, Psy Protocol
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,7 +20,7 @@ As permitted by section 7(b) of the GNU Affero General Public License,
 you must retain the following attribution notice in all copies or 
 substantial portions of the software:
 
-"This software was created by QED (https://qedprotocol.com)
+"This software was created by Psy Protocol (https://psy.xyz)
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
@@ -33,7 +33,7 @@ use serde::{Serialize, Deserialize};
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned};
 
 use crate::{
-    block_data_tracker::{BlockDataRecord, BlockDataTracker}, constants::DogeNetworkConfig, core_data::{QDogeBlockHeader, QHash256}, error::{DogeBridgeError, QDogeResult}, hash::{merkle::fixed_append_tree::FixedMerkleAppendTree, sha256::QSha256Hasher}, init_params::InitBlockDataIBC, logic::check_doge_block::check_block_header_err
+    block_data_tracker::{BlockDataRecord, BlockDataTracker}, constants::DogeNetworkConfig, common_types::QHash256, core_data::QDogeBlockHeader, error::{DogeBridgeError, QDogeResult}, hash::{merkle::fixed_append_tree::FixedMerkleAppendTree, sha256::QSha256Hasher}, init_params::InitBlockDataIBC, logic::check_doge_block::check_block_header_err
 };
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
