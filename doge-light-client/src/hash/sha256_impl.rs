@@ -28,7 +28,11 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 use sha2::{Digest, Sha256};
 
 #[cfg(all(not(feature = "solprogram"),feature = "sha2"))]
-pub fn hash_impl_sha256_bytes(bytes: &[u8]) -> [u8; 32] {
+use crate::common_types::QHash256;
+
+#[cfg(all(not(feature = "solprogram"),feature = "sha2"))]
+#[inline]
+pub fn hash_impl_sha256_bytes(bytes: &[u8]) -> QHash256 {
     let mut hasher = Sha256::new();
     hasher.update(bytes);
     let result = hasher.finalize();
@@ -36,6 +40,7 @@ pub fn hash_impl_sha256_bytes(bytes: &[u8]) -> [u8; 32] {
 }
 
 #[cfg(feature = "solprogram")]
-pub fn hash_impl_sha256_bytes(bytes: &[u8]) -> [u8; 32] {
+#[inline]
+pub fn hash_impl_sha256_bytes(bytes: &[u8]) -> QHash256 {
     solana_program::hash::hash(bytes).to_bytes()
 }

@@ -55,6 +55,10 @@ impl MerkleZeroHasher<QHash256> for QSha256Hasher {
 
 
 
+#[inline(always)]
+pub fn btc_hash256_bytes(bytes: &[u8]) -> QHash256 {
+    hash_impl_sha256_bytes(&hash_impl_sha256_bytes(bytes))
+}
 
 #[derive(Clone, Copy)]
 pub struct QBTCHash256Hasher;

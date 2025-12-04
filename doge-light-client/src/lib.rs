@@ -35,5 +35,5 @@ pub mod error;
 pub mod block_data_tracker;
 pub mod init_params;
 pub mod chain_state;
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 pub mod serde_array;

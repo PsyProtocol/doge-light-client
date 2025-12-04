@@ -24,12 +24,12 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "borsh")]
+#[cfg(feature = "serialize_borsh")]
 use borsh::{BorshSerialize, BorshDeserialize};
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Serialize, Deserialize};
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use crate::serde_array::serde_arrays;
 
 use zerocopy::little_endian::{U16, U32};
@@ -38,8 +38,8 @@ use zerocopy_derive::{FromBytes, Immutable, IntoBytes, Unaligned};
 use crate::{common_types::QHash256, error::{DogeBridgeError, QDogeResult}};
 
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, IntoBytes, Immutable, Unaligned, Default)]
 #[repr(C)]
 pub struct BlockDataRecord {
@@ -50,8 +50,8 @@ pub struct BlockDataRecord {
     pub bits: U32,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, IntoBytes, Default)]
 #[repr(C)]
 pub struct PoWBlockContext {
@@ -61,29 +61,29 @@ pub struct PoWBlockContext {
     pub first_block_time: u32,
 }
 
-#[cfg(feature = "serde")]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg(feature = "serialize_serde")]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, Serialize, Deserialize, IntoBytes, Immutable, Unaligned)]
 #[repr(C)]
-pub struct BlockDataTracker<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize> {
+pub struct BlockDataTracker<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize> {
     pub tip_block_number: U32,
     pub tip_internal_index: U16,
     #[serde(with = "serde_arrays")]
     pub records: [BlockDataRecord; QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE],
 }
 
-#[cfg(not(feature = "serde"))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg(not(feature = "serialize_serde"))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes,  IntoBytes, Immutable, Unaligned)]
 #[repr(C)]
-pub struct BlockDataTracker<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize> {
+pub struct BlockDataTracker<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize> {
     pub tip_block_number: U32,
     pub tip_internal_index: U16,
     pub records: [BlockDataRecord; QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE],
 }
 
 
-impl<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize> BlockDataTracker<QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE, QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS> {
+impl<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize> BlockDataTracker<QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE> {
     /*
     fn new_empty() -> Self {
         BlockDataTracker {
@@ -141,8 +141,8 @@ impl<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, const QDOGE_BRIDGE_REQUIRE
         self.tip_block_number.into()
     }
 
-    pub fn get_finalized_block_number(&self) -> u32 {
-        self.get_tip_block_number() - QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS as u32
+    pub fn get_finalized_block_number(&self, required_confirmations: u32) -> u32 {
+        self.get_tip_block_number() - required_confirmations
     }
     pub fn get_tip_internal_index(&self) -> u16 {
         self.tip_internal_index.into()
@@ -188,7 +188,7 @@ impl<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, const QDOGE_BRIDGE_REQUIRE
             return Err(DogeBridgeError::BlockNotInCache);
         }
         let offset = (self.get_tip_block_number() - last_good_block_number) as usize;
-        if offset >= QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS as usize {
+        if offset >= QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE as usize {
             return Err(DogeBridgeError::AttemptedToModifiyFinalizedBlock);
         }
         if offset < num_blocks_to_insert {

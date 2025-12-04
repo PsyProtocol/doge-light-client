@@ -26,16 +26,16 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 
 //! Error types
 
-#[cfg(feature = "borsh")]
+#[cfg(feature = "serialize_borsh")]
 use borsh::{BorshSerialize, BorshDeserialize};
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Serialize, Deserialize};
 
 use num_derive::FromPrimitive;
 use thiserror::Error;
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 /// Errors that may be returned by the oracle program
 #[derive(Clone, Debug, Eq, Error, PartialEq, Copy, FromPrimitive)]
 pub enum DogeBridgeError {

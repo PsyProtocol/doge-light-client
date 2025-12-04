@@ -34,7 +34,7 @@ use crate::{constants::{DogeMainNetConfig, DogeNetworkConfig, DogeRegTestConfig,
 use super::transaction::BTCTransactionOutput;
 
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -45,14 +45,14 @@ pub enum BTCAddressType {
     P2SH = 1,
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 
 impl Serialize for BTCAddressType {
     fn serialize<S: serde::ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         Serialize::serialize(&self.to_u8(), serializer)
     }
 }
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 
 impl<'de> Deserialize<'de> for BTCAddressType {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -149,8 +149,8 @@ pub trait AddressToBTCScript {
 }
 
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(PartialEq, Debug, Clone, Copy, Eq, Hash, PartialOrd, Ord)]
 pub struct BTCAddress160 {
     pub address_type: BTCAddressType,

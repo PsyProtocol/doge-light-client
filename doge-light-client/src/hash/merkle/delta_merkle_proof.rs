@@ -24,17 +24,17 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "borsh")]
+#[cfg(feature = "serialize_borsh")]
 use borsh::{BorshSerialize, BorshDeserialize};
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Serialize, Deserialize};
 
 use crate::hash::traits::MerkleHasher;
 
 use super::utils::compute_root_merkle_proof_generic;
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DeltaMerkleProofCore<Hash: PartialEq + Copy> {
     pub old_root: Hash,
@@ -48,8 +48,8 @@ pub struct DeltaMerkleProofCore<Hash: PartialEq + Copy> {
 }
 
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DeltaMerkleProofCorePartial<Hash: PartialEq + Copy> {
     pub old_value: Hash,

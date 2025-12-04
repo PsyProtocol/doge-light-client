@@ -24,9 +24,9 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "borsh")]
+#[cfg(feature = "serialize_borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -36,8 +36,8 @@ use crate::{
     }
 };
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct InitBlockDataRecord {
     pub block_hash: QHash256,
@@ -82,7 +82,7 @@ impl From<&InitBlockDataRecord> for BlockDataRecord {
 }
 
 /*
-#[cfg(not(feature = "serde"))]
+#[cfg(not(feature = "serialize_serde"))]
 #[derive(Debug, Clone, Copy, BorshSerialize, BorshDeserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct InitBlockDataIBC<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, const QDOGE_BRIDGE_BLOCK_TREE_HEIGHT: usize> {
     pub records: [InitBlockDataRecord; QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE],
@@ -91,7 +91,7 @@ pub struct InitBlockDataIBC<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize, con
 }
 */
 
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct InitBlockDataIBC<
     const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize,

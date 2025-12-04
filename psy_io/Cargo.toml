@@ -1,0 +1,15 @@
+[package]
+edition = "2021"
+name    = "psy_io"
+version = "0.1.0"
+
+[features]
+default = []
+std = ["alloc", "embedded-io/std", "embedded-io-async/std"]
+alloc = ["embedded-io/alloc", "embedded-io-async/std"]
+
+[dependencies]
+anyhow     = { workspace = true }
+embedded-io = { workspace = true }
+
+embedded-io-async = { workspace = true }

@@ -24,13 +24,13 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "borsh")]
+#[cfg(feature = "serialize_borsh")]
 use borsh::{BorshSerialize, BorshDeserialize};
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Serialize, Deserialize};
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use crate::serde_array::serde_arrays;
 
 
@@ -43,8 +43,8 @@ use super::{append_tree::MerkleAppendTreeLevel, delta_merkle_proof::DeltaMerkleP
 
 
 /* 
-#[cfg(feature = "serde")]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg(feature = "serialize_serde")]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned, Serialize, Deserialize)]
 #[repr(C)]
 #[serde_as]
@@ -54,7 +54,7 @@ pub struct FixedMerkleAppendTree<Hash: PartialEq + Copy, const HEIGHT: usize> wh
     pub levels: [MerkleAppendTreeLevel<Hash>; HEIGHT],
 }*/
 
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, KnownLayout, IntoBytes, Unaligned, Immutable)]
 #[repr(C)]
 pub struct FixedMerkleAppendTree<Hash: PartialEq + Copy, const HEIGHT: usize> {
@@ -62,8 +62,8 @@ pub struct FixedMerkleAppendTree<Hash: PartialEq + Copy, const HEIGHT: usize> {
     pub levels: [MerkleAppendTreeLevel<Hash>; HEIGHT],
 }
 
-#[cfg(feature = "serde")]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg(feature = "serialize_serde")]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, Serialize, Deserialize)]
 #[serde(bound = "for<'de2> Hash: Deserialize<'de2>")]
 struct SerFixedMerkleAppendTree<Hash: PartialEq + Copy + Serialize, const HEIGHT: usize> {
@@ -73,7 +73,7 @@ struct SerFixedMerkleAppendTree<Hash: PartialEq + Copy + Serialize, const HEIGHT
 }
 
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 impl<Hash: PartialEq + Copy, const HEIGHT: usize> serde::Serialize for FixedMerkleAppendTree<Hash, HEIGHT> where Hash: serde::Serialize + serde::de::DeserializeOwned {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -87,7 +87,7 @@ impl<Hash: PartialEq + Copy, const HEIGHT: usize> serde::Serialize for FixedMerk
 
 
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 impl<'de, Hash: PartialEq + Copy, const HEIGHT: usize> serde::Deserialize<'de> for FixedMerkleAppendTree<Hash, HEIGHT> where Hash: serde::Serialize + serde::de::DeserializeOwned {
     
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

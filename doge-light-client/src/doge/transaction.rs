@@ -26,7 +26,7 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 
 use borsh::{BorshDeserialize, BorshSerialize};
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Deserialize, Serialize};
 //use bitcoin::consensus::{deserialize_partial, serialize};
 //use bitcoin::VarInt;
@@ -38,8 +38,8 @@ use crate::hash::traits::BytesHasher;
 use super::address::{AddressToBTCScript, BTCAddress160};
 use super::varuint::{decode_varuint_partial, encode_varuint, varuint_size};
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(PartialEq, Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct BTCTransaction {
     pub version: u32,
@@ -48,16 +48,16 @@ pub struct BTCTransaction {
     pub locktime: u32,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(PartialEq, Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct BTCTransactionOutput {
     pub value: u64,
     pub script: Vec<u8>,
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(PartialEq, Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct BTCTransactionInputWithoutScript {
     pub hash: QHash256,
@@ -82,8 +82,8 @@ impl BTCTransactionInputWithoutScript {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(PartialEq, Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct BTCTransactionInput {
     pub hash: QHash256,

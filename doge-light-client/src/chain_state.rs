@@ -24,9 +24,9 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "borsh")]
+#[cfg(feature = "serialize_borsh")]
 use borsh::{BorshSerialize, BorshDeserialize};
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize_serde")]
 use serde::{Serialize, Deserialize};
 
 
@@ -36,17 +36,17 @@ use crate::{
     block_data_tracker::{BlockDataRecord, BlockDataTracker}, constants::DogeNetworkConfig, common_types::QHash256, core_data::QDogeBlockHeader, error::{DogeBridgeError, QDogeResult}, hash::{merkle::fixed_append_tree::FixedMerkleAppendTree, sha256::QSha256Hasher}, init_params::InitBlockDataIBC, logic::check_doge_block::check_block_header_err
 };
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, Immutable, KnownLayout, IntoBytes, Unaligned)]
 #[repr(C)]
 pub struct QEDDogeChainStateCore<
     const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize,
-    const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize,
     const QDOGE_BRIDGE_BLOCK_TREE_HEIGHT: usize,
+
 > {
     pub block_data_tracker:
-        BlockDataTracker<QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE, QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS>,
+        BlockDataTracker<QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE>,
     pub block_tree_tracker: FixedMerkleAppendTree<QHash256, QDOGE_BRIDGE_BLOCK_TREE_HEIGHT>,
 }
 
@@ -54,19 +54,16 @@ type QBlockTreeTrackerHasher = QSha256Hasher;
 
 impl<
         const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize,
-        const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize,
         const QDOGE_BRIDGE_BLOCK_TREE_HEIGHT: usize,
     >
     QEDDogeChainStateCore<
         QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE,
-        QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS,
         QDOGE_BRIDGE_BLOCK_TREE_HEIGHT,
     >
 {
     pub fn new(
         block_data_tracker: BlockDataTracker<
             QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE,
-            QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS,
         >,
         block_tree_tracker: FixedMerkleAppendTree<QHash256, QDOGE_BRIDGE_BLOCK_TREE_HEIGHT>,
     ) -> Self {
@@ -90,8 +87,8 @@ impl<
     pub fn get_block_hash(&self, block_number: u32) -> QDogeResult<QHash256> {
         self.block_data_tracker.get_block_hash(block_number)
     }
-    pub fn get_finalized_block_number(&self) -> u32 {
-        self.block_data_tracker.get_finalized_block_number()
+    pub fn get_finalized_block_number(&self, required_confirmations: u32) -> u32 {
+        self.block_data_tracker.get_finalized_block_number(required_confirmations)
     }
     pub fn get_tip_block_number(&self) -> u32 {
         self.block_data_tracker.get_tip_block_number()
@@ -101,9 +98,9 @@ impl<
             .get_block_hash(self.get_tip_block_number())
             .unwrap()
     }
-    pub fn get_finalized_block_hash(&self) -> QHash256 {
+    pub fn get_finalized_block_hash(&self, required_confirmations: u32) -> QHash256 {
         self.block_data_tracker
-            .get_block_hash(self.get_finalized_block_number())
+            .get_block_hash(self.get_finalized_block_number(required_confirmations))
             .unwrap()
     }
     pub fn ensure_internal_consistency(&self) -> QDogeResult<()> {
