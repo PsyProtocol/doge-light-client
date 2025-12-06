@@ -25,7 +25,7 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 
-use psy_doge_data_link::{electrs_link::DogeLinkElectrsClient, traits::QDogeBlockHeaderFetcher, wrapped_hash_256::WrappedHash256};
+use psy_doge_data_link::{link_common::wrapped_hash_256::WrappedHash256, link_sync::electrs_link::DogeLinkElectrsClient, traits::QDogeBlockHeaderFetcher};
 use doge_light_client::{common_types::QHash256, hash::sha256::QBTCHash256Hasher, network_params::DogeNetworkType};
 fn run_merkle_test(
     txids: &[QHash256],

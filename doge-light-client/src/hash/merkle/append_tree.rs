@@ -24,11 +24,6 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "serialize_borsh")]
-use borsh::{BorshDeserialize, BorshSerialize};
-#[cfg(feature = "serialize_serde")]
-use serde::{Deserialize, Serialize};
-
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned};
 
 use crate::hash::traits::{get_zero_hashes, MerkleHasher, MerkleZeroHasher, ZeroableHash};
@@ -36,8 +31,9 @@ use crate::hash::traits::{get_zero_hashes, MerkleHasher, MerkleZeroHasher, Zeroa
 use super::{delta_merkle_proof::DeltaMerkleProofCore, merkle_proof::{MerkleProofCore, MerkleProofCorePartial}};
 
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned)]
 #[repr(C)]
 pub struct MerkleAppendTreeLevel<Hash: PartialEq + Copy> {

@@ -42,10 +42,9 @@ use doge_light_client::{
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use ureq::Agent;
 
-use crate::bitcoin_convert::btc_block_to_qdoge;
+use crate::link_common::{bitcoin_convert::btc_block_to_qdoge, wrapped_hash_256::WrappedHash256};
 use crate::{
     traits::{QDogeBlockFetcher, QDogeBlockHeaderFetcher},
-    wrapped_hash_256::WrappedHash256,
 };
 
 #[derive(Debug, Clone)]

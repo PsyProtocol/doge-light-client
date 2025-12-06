@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["serialize_borsh", "sha2", "serialize_bytemuck", "serialize_speedy"]
-serialize_borsh = ["dep:borsh", "doge-light-client/serialize_borsh"]
-serialize_serde = ["dep:serde", "dep:serde_with", "doge-light-client/serialize_serde"]
+default = ["serialize_borsh", "sha2", "serialize_bytemuck", "serialize_speedy", "std"]
+serialize_borsh = ["dep:borsh", "doge-light-client/serialize_borsh", "psy-doge-bridge-helper/serialize_borsh"]
+serialize_serde = ["dep:serde", "dep:serde_with", "doge-light-client/serialize_serde", "psy-doge-bridge-helper/serialize_serde"]
 bitcoin = ["dep:bitcoin", "serialize_serde", "doge-light-client/serialize_serde"]
-solprogram = ["dep:solana-program", "doge-light-client/solprogram"]
-sha2 = ["dep:sha2", "doge-light-client/sha2"]
-std = ["doge-light-client/std"]
+solprogram = ["dep:solana-program", "doge-light-client/solprogram", "psy-doge-bridge-helper/solprogram"]
+sha2 = ["dep:sha2", "doge-light-client/sha2", "psy-doge-bridge-helper/sha2"]
+std = ["doge-light-client/std", "psy-doge-bridge-helper/std"]
 
-serialize_speedy = ["dep:speedy", "doge-light-client/serialize_speedy"]
-serialize_bytemuck = ["dep:bytemuck", "doge-light-client/serialize_bytemuck"]
+serialize_speedy = ["dep:speedy", "doge-light-client/serialize_speedy", "psy-doge-bridge-helper/serialize_speedy"]
+serialize_bytemuck = ["dep:bytemuck", "doge-light-client/serialize_bytemuck", "psy-doge-bridge-helper/serialize_bytemuck"]
 
 [dependencies]
 serde = { workspace = true, optional = true }
@@ -36,7 +36,7 @@ anyhow = { workspace = true }
 solana-program = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
 doge-light-client = { workspace = true }
-
+psy-doge-bridge-helper = { workspace = true }
 [dev-dependencies]
 hex = { workspace = true }
 hex-literal = { workspace = true }

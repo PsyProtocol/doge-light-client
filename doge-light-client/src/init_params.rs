@@ -26,8 +26,6 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 
 #[cfg(feature = "serialize_borsh")]
 use borsh::{BorshDeserialize, BorshSerialize};
-#[cfg(feature = "serialize_serde")]
-use serde::{Deserialize, Serialize};
 
 use crate::{
     block_data_tracker::BlockDataRecord, common_types::QHash256, core_data::{QDogeBlock, QDogeBlockHeader}, hash::{
@@ -36,8 +34,9 @@ use crate::{
     }
 };
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct InitBlockDataRecord {
     pub block_hash: QHash256,

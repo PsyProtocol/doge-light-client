@@ -24,7 +24,7 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-use psy_doge_data_link::{block_cache::BlockFetcher, electrs_link::DogeLinkElectrsClient};
+use psy_doge_data_link::link_sync::{block_cache::BlockFetcher, electrs_link::DogeLinkElectrsClient};
 use doge_light_client::network_params::DogeNetworkType;
 
 fn run_cache_blocks(

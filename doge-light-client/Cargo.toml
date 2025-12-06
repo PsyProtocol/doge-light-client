@@ -12,8 +12,8 @@ solprogram = ["dep:solana-program"]
 sha2 = ["dep:sha2"]
 std = []
 
-serialize_speedy = ["dep:speedy"]
-serialize_bytemuck = ["dep:bytemuck"]
+serialize_speedy = ["dep:speedy", "zerocopy/speedy"]
+serialize_bytemuck = ["dep:bytemuck", "zerocopy/bytemuck"]
 
 [dependencies]
 serde = { workspace = true, optional = true }
@@ -25,8 +25,8 @@ borsh = { workspace = true, optional = true }
 thiserror = { workspace = true }
 num-derive = { workspace = true }
 num-traits = { workspace = true }
-zerocopy = { git = "https://github.com/cf/zerocopy-borsh-serde", branch = "borsh-serde-v0.8.23", features = ["borsh"] }
-zerocopy-derive = { git = "https://github.com/cf/zerocopy-borsh-serde", branch = "borsh-serde-v0.8.23" }
+zerocopy = { workspace = true }
+zerocopy-derive = { workspace = true }
 
 bitcoin = { workspace = true, optional = true }
 anyhow = { workspace = true }
@@ -34,7 +34,6 @@ bytemuck = { workspace = true, optional = true }
 speedy = { workspace = true, optional = true }
 solana-program = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
-
 [dev-dependencies]
 hex = { workspace = true }
 hex-literal = { workspace = true }

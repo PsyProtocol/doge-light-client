@@ -24,13 +24,13 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-use psy_doge_data_link::{
+use psy_doge_data_link::{link_sync::{
     block_header_cache::BlockHeaderFetcher, bridge_state_helpers::gen_bridge_initial_state,
-    electrs_link::DogeLinkElectrsClient, traits::QDogeBlockHeaderFetcher,
-};
+    electrs_link::DogeLinkElectrsClient,
+}, traits::QDogeBlockHeaderFetcher};
 use doge_light_client::{constants::DogeMainNetConfig, network_params::DogeNetworkType};
 
-const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize = 4;
+//const QDOGE_BRIDGE_REQUIRED_CONFIRMATIONS: usize = 4;
 const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize = 32;
 const QDOGE_BRIDGE_BLOCK_TREE_HEIGHT: usize = 32;
 

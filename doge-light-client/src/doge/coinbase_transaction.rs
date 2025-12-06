@@ -24,10 +24,7 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-use borsh::{BorshDeserialize, BorshSerialize};
 
-#[cfg(feature = "serialize_serde")]
-use serde::{Deserialize, Serialize};
 //use bitcoin::consensus::{deserialize_partial, serialize};
 //use bitcoin::VarInt;
 
@@ -39,8 +36,10 @@ use crate::hash::traits::BytesHasher;
 use super::address::{AddressToBTCScript, BTCAddress160};
 use super::varuint::{decode_varuint_partial, encode_varuint, varuint_size};
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(PartialEq, Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct DogeAuxPowCoinbaseTransaction {
     pub version: u32,
@@ -49,8 +48,9 @@ pub struct DogeAuxPowCoinbaseTransaction {
     pub locktime: u32,
 }
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(PartialEq, Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct DogeAuxPowCoinbaseTransactionInput {
     pub hash: QHash256,

@@ -25,11 +25,11 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
 use doge_light_client::network_params::DogeNetworkType;
-use psy_doge_data_link::{
+use psy_doge_data_link::link_sync::{
     block_header_cache::BlockHeaderFetcher, electrs_link::DogeLinkElectrsClient,
 };
 
-use psy_doge_data_link::hex_helpers::{hex_array_32, hex_array_80};
+use psy_doge_data_link::link_common::hex_helpers::{hex_array_32, hex_array_80};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 

@@ -29,7 +29,7 @@ use std::collections::HashMap;
 use doge_light_client::core_data::QDogeBlock;
 use serde::{Deserialize, Serialize};
 
-use crate::{electrs_link::DogeLinkElectrsClient, traits::QDogeBlockFetcher};
+use crate::{link_sync::electrs_link::DogeLinkElectrsClient, traits::QDogeBlockFetcher};
 
 
 

@@ -24,11 +24,11 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-use psy_doge_data_link::{block_header_cache::BlockHeaderFetcher, electrs_link::DogeLinkElectrsClient};
+use psy_doge_data_link::link_sync::{block_header_cache::BlockHeaderFetcher, electrs_link::DogeLinkElectrsClient};
 use doge_light_client::network_params::DogeNetworkType;
 use serde::{Deserialize, Serialize};
 
-use psy_doge_data_link::hex_helpers::{hex_array_32, hex_array_80};
+use psy_doge_data_link::link_common::hex_helpers::{hex_array_32, hex_array_80};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct DogeScryptBlockHeader {

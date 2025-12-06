@@ -36,7 +36,7 @@ use super::transaction::BTCTransactionOutput;
 
 #[cfg(feature = "serialize_serde")]
 use serde::{Deserialize, Serialize};
-
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(
     PartialEq, Debug, Clone, Copy, Eq, Hash, PartialOrd, Ord,
 )]
@@ -149,8 +149,9 @@ pub trait AddressToBTCScript {
 }
 
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(PartialEq, Debug, Clone, Copy, Eq, Hash, PartialOrd, Ord)]
 pub struct BTCAddress160 {
     pub address_type: BTCAddressType,

@@ -38,8 +38,10 @@ use zerocopy_derive::{FromBytes, Immutable, IntoBytes, Unaligned};
 use crate::{common_types::QHash256, error::{DogeBridgeError, QDogeResult}};
 
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
+#[cfg_attr(feature = "serialize_bytemuck", derive(bytemuck::Pod, bytemuck::Zeroable))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, IntoBytes, Immutable, Unaligned, Default)]
 #[repr(C)]
 pub struct BlockDataRecord {
@@ -50,8 +52,10 @@ pub struct BlockDataRecord {
     pub bits: U32,
 }
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
+#[cfg_attr(feature = "serialize_bytemuck", derive(bytemuck::Pod, bytemuck::Zeroable))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, IntoBytes, Default)]
 #[repr(C)]
 pub struct PoWBlockContext {
@@ -60,6 +64,7 @@ pub struct PoWBlockContext {
     pub last_bits: u32,
     pub first_block_time: u32,
 }
+
 
 #[cfg(feature = "serialize_serde")]
 #[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
@@ -225,3 +230,4 @@ impl<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize> BlockDataTracker<QDOGE_BRI
         Ok(&self.records[index])
     }
 }
+

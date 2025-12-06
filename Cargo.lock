@@ -495,6 +495,7 @@ dependencies = [
  "hex-literal",
  "num-derive 0.3.3",
  "num-traits",
+ "psy-doge-bridge-helper",
  "rand 0.8.5",
  "rand_core 0.6.4",
  "ripemd",
@@ -505,8 +506,8 @@ dependencies = [
  "solana-program",
  "speedy",
  "thiserror",
- "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
- "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
+ "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns)",
+ "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns)",
 ]
 
 [[package]]
@@ -532,8 +533,8 @@ dependencies = [
  "solana-program",
  "speedy",
  "thiserror",
- "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
- "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
+ "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns)",
+ "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns)",
 ]
 
 [[package]]
@@ -1069,8 +1070,8 @@ dependencies = [
  "serde_with",
  "thiserror",
  "ureq",
- "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
- "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
+ "zerocopy 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns)",
+ "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns)",
 ]
 
 [[package]]
@@ -2290,11 +2291,13 @@ dependencies = [
 [[package]]
 name = "zerocopy"
 version = "0.8.23"
-source = "git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23#79214408d278cab367368d1f2b14ef1d923739d7"
+source = "git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns#202766516ee2adc04074e1c880d656900366a2da"
 dependencies = [
  "borsh 0.10.4",
+ "bytemuck",
  "serde",
- "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23)",
+ "speedy",
+ "zerocopy-derive 0.8.23 (git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns)",
 ]
 
 [[package]]
@@ -2322,7 +2325,7 @@ dependencies = [
 [[package]]
 name = "zerocopy-derive"
 version = "0.8.23"
-source = "git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-v0.8.23#79214408d278cab367368d1f2b14ef1d923739d7"
+source = "git+https://github.com/cf/zerocopy-borsh-serde?branch=borsh-serde-speedy-bytemuck-v0.8.23-ns#202766516ee2adc04074e1c880d656900366a2da"
 dependencies = [
  "proc-macro2",
  "quote",

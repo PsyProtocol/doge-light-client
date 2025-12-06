@@ -24,20 +24,15 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "serialize_borsh")]
-use borsh::{BorshSerialize, BorshDeserialize};
-#[cfg(feature = "serialize_serde")]
-use serde::{Serialize, Deserialize};
-
-
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned};
 
 use crate::{
     block_data_tracker::{BlockDataRecord, BlockDataTracker}, constants::DogeNetworkConfig, common_types::QHash256, core_data::QDogeBlockHeader, error::{DogeBridgeError, QDogeResult}, hash::{merkle::fixed_append_tree::FixedMerkleAppendTree, sha256::QSha256Hasher}, init_params::InitBlockDataIBC, logic::check_doge_block::check_block_header_err
 };
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, Immutable, KnownLayout, IntoBytes, Unaligned)]
 #[repr(C)]
 pub struct QEDDogeChainStateCore<

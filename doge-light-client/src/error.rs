@@ -164,7 +164,44 @@ pub enum DogeBridgeError {
     RevertIndexNotPrefix = 726,
     #[error("Too many changed left siblings provided")]
     TooManyChangedLeftSiblings = 727,
+
+
+
+    #[error("Invalid bridge ZKP")]
+    BridgeZKPError = 750,
+
+    #[error("Invalid bridge ZKP provided as input")]
+    InvalidBridgeInputZKP = 751,
+
+    #[error("Invalid verifier key for bridge ZKP")]
+    InvalidVerifierKeyForBridgeZKP = 752,
+
+    #[error("Invalid public inputs for bridge ZKP")]
+    InvalidPublicInputsForBridgeZKP = 753,
+
+
+
+    #[error("There are no fees to send to the fee collector")]
+    NoFeesToSendToFeeCollector = 800,
+
+    #[error("You cannot rollback to a state before the last finalized block")]
+    AttemptedRollbackOfFinalizedBlock = 801,
+
+    #[error("The bit-list buffer provided is too small for the size specified in the bit vector header")]
+    BitListBufferTooSmall = 802,
+    #[error("The hash of the bit-list or the provided new bit-list hash stack does not match the expected hash")]
+    BitListHashMismatch = 803,
+    #[error("The user attempted to pop from an empty bit-list hash stack")]
+    BitListEmpty = 804,
+
+    #[error("The provided public key and amount or updated pending mint hash stack hash do not match the expected value")]
+    AutoProcessMintHashMismatch = 805,
+    #[error("The caller attempted to perform a bridge state transition without clearing the pending auto processed mint hash stack")]
+    AutoProcessMintHashNotEmpty = 806,
+
+
 }
+
 
 
 #[cfg(feature = "solprogram")]

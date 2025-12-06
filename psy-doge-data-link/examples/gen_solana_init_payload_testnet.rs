@@ -24,7 +24,7 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-use psy_doge_data_link::{block_header_cache::BlockHeaderFetcher, bridge_state_helpers::gen_bridge_initial_state_data, electrs_link::DogeLinkElectrsClient};
+use psy_doge_data_link::link_sync::{block_header_cache::BlockHeaderFetcher, bridge_state_helpers::gen_bridge_initial_state_data, electrs_link::DogeLinkElectrsClient};
 use doge_light_client::network_params::DogeNetworkType;
 
 fn main() {

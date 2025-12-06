@@ -2,7 +2,7 @@ use std::{collections::HashMap, marker::PhantomData};
 
 use doge_light_client::hash::{merkle::{delta_merkle_proof::DeltaMerkleProofCore, merkle_proof::MerkleProofCore}, traits::{MerkleHasher, ZeroableHash}};
 
-use crate::simple_merkle_node::SimpleMerkleNodeKey;
+use super::simple_merkle_node::SimpleMerkleNodeKey;
 
 
 #[derive(Clone)]

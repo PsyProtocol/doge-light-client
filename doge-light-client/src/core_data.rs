@@ -24,10 +24,6 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
-#[cfg(feature = "serialize_borsh")]
-use borsh::{BorshDeserialize, BorshSerialize};
-#[cfg(feature = "serialize_serde")]
-use serde::{Deserialize, Serialize};
 
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes};
 
@@ -61,11 +57,14 @@ fn find_in_array(data: &[u8], search_sub_array: &[u8]) -> Option<usize> {
 }
 // Return
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
+#[cfg_attr(feature = "serialize_bytemuck", derive(bytemuck::Pod, bytemuck::Zeroable))]
 #[derive(
     Copy, Clone, Debug, Default, PartialEq, PartialOrd, Eq, Ord, FromBytes, IntoBytes, Immutable,
 )]
+#[repr(C)]
 pub struct QStandardBlockHeader {
     pub version: u32,
     pub previous_block_hash: QHash256,
@@ -140,8 +139,9 @@ impl QStandardBlockHeader {
     }
 }
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub struct QMerkleBranch {
     pub hashes: Vec<QHash256>,
@@ -194,8 +194,9 @@ impl QMerkleBranch {
     }
 }
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub struct QAuxPow {
     pub coinbase_transaction: DogeAuxPowCoinbaseTransaction,
@@ -426,8 +427,9 @@ impl QAuxPow {
     }
 }
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct QDogeBlockHeader {
     pub header: QStandardBlockHeader,
@@ -455,8 +457,9 @@ impl QDogeBlockHeader {
     }
 }
 
-#[cfg_attr(feature = "serialize_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct QDogeBlock {
     pub header: QStandardBlockHeader,

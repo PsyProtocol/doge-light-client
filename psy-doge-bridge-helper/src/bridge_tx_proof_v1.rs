@@ -1,5 +1,5 @@
 use doge_light_client::{
-    chain_state::QEDDogeChainStateCore, common_types::{QHash160, QHash256}, doge::transaction::BTCTransaction, hash::{merkle::in_memory::{compute_dogecoin_block_transaction_merkle_proof_tree_root_in_memory, compute_dogecoin_last_transaction_in_block_merkle_root_in_memory, compute_sha256_merkle_root_in_memory}, sha256::btc_hash256_bytes, sha256_impl::hash_impl_sha256_bytes}
+    chain_state::QEDDogeChainStateCore, common_types::{QHash160, QHash256}, doge::transaction::BTCTransaction, hash::{merkle::in_memory::{compute_dogecoin_block_transaction_merkle_proof_tree_root_in_memory, compute_sha256_merkle_root_in_memory}, sha256::btc_hash256_bytes}
 };
 
 use crate::{

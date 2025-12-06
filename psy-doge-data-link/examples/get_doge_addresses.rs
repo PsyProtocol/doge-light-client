@@ -26,7 +26,7 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 
 use std::collections::HashSet;
 
-use psy_doge_data_link::{block_cache::BlockFetcher, electrs_link::DogeLinkElectrsClient};
+use psy_doge_data_link::link_sync::{block_cache::BlockFetcher, electrs_link::DogeLinkElectrsClient};
 use doge_light_client::{constants::DogeTestNetConfig, doge::{address::BTCAddress160, transaction::BTCTransaction}, network_params::DogeNetworkType};
 fn get_doge_output_addresses_for_tx(tx: &BTCTransaction) -> Vec<BTCAddress160> {
     let mut addrs = tx.outputs.iter().map(|x| x.get_output_address()).filter(|x|x.is_ok()).map(|x|x.unwrap()).collect::<Vec<BTCAddress160>>();
