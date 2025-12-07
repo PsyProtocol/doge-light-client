@@ -1,2 +1,2 @@
-pub mod client;
-pub mod electrs_types;
+mod client;
+pub use client::*;

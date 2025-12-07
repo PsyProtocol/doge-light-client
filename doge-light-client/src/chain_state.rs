@@ -24,10 +24,11 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
+use zerocopy::{U32, little_endian::U64};
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned};
 
 use crate::{
-    block_data_tracker::{BlockDataRecord, BlockDataTracker}, constants::DogeNetworkConfig, common_types::QHash256, core_data::QDogeBlockHeader, error::{DogeBridgeError, QDogeResult}, hash::{merkle::fixed_append_tree::FixedMerkleAppendTree, sha256::QSha256Hasher}, init_params::InitBlockDataIBC, logic::check_doge_block::check_block_header_err
+    block_data_tracker::{BlockDataRecord, BlockDataTracker}, common_types::QHash256, constants::DogeNetworkConfig, core_data::{QDogeBlockHeader, QDogeBlockHeaderAndClaimInfo}, error::{DogeBridgeError, QDogeResult}, hash::{merkle::fixed_append_tree::FixedMerkleAppendTree, sha256::QSha256Hasher}, init_params::InitBlockDataIBC, logic::check_doge_block::check_block_header_err
 };
 
 #[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
@@ -116,7 +117,7 @@ impl<
         &mut self,
         last_good_block_number: u32,
         tree_tracker_changed_left_siblings: &[QHash256],
-        blocks: &[QDogeBlockHeader],
+        blocks: &[QDogeBlockHeaderAndClaimInfo],
         known_aux_pow_block_hashes: &[Option<QHash256>],
     ) -> QDogeResult<()> {
         self.ensure_internal_consistency()?;
@@ -146,7 +147,7 @@ impl<
         self.block_data_tracker
             .rollback_first(last_good_block_number, blocks.len())?;
         for (i, (block, optional_aux_pow_hash)) in blocks.iter().zip(known_aux_pow_block_hashes).enumerate() {
-            self.append_block::<NC>(last_good_block_number + i as u32 + 1, block, *optional_aux_pow_hash)?;
+            self.append_block::<NC>(last_good_block_number + i as u32 + 1, &block.block_header, block.claimed_txo_tree_root, block.auto_claimed_deposits_tree_root, block.auto_claimed_deposits_next_index, block.fees_collected_for_block, *optional_aux_pow_hash)?;
         }
 
         self.ensure_internal_consistency()?;
@@ -157,6 +158,10 @@ impl<
         &mut self,
         block_number: u32,
         block_header: &QDogeBlockHeader,
+        auto_claimed_txo_tree_root: QHash256,
+        auto_claimed_deposits_tree_root: QHash256,
+        auto_claimed_deposits_index: u32,
+        fees_collected_for_block: u64,
         known_aux_pow_block_hash: Option<QHash256>,
     ) -> QDogeResult<()> {
         if self.contains_block(block_number) {
@@ -184,6 +189,13 @@ impl<
         )?;
 
         let new_block_hash = block_header.header.get_hash();
+        let tip = self.get_tip_block_number();
+        let tip_record = self.block_data_tracker.get_record(tip)?;
+        let tip_record_total_fees: u64 = tip_record.total_fees_collected_chain_history.into();
+        let new_total_fees_collected_chain_history = tip_record_total_fees
+            .checked_add(fees_collected_for_block)
+            .ok_or(DogeBridgeError::NumericalOverflow)?;
+
 
         self.block_tree_tracker
             .append::<QBlockTreeTrackerHasher>(new_block_hash);
@@ -197,6 +209,10 @@ impl<
             tx_tree_merkle_root: block_header.header.merkle_root,
             timestamp: block_header.header.timestamp.into(),
             bits: block_header.header.bits.into(),
+            auto_claimed_txo_tree_root,
+            auto_claimed_deposits_tree_root,
+            auto_claimed_deposits_next_index: U32::new(auto_claimed_deposits_index),
+            total_fees_collected_chain_history: U64::new(new_total_fees_collected_chain_history),
         };
 
         self.block_data_tracker.add_record(block_data_record);

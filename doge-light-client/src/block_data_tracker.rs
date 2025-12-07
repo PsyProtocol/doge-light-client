@@ -32,10 +32,10 @@ use serde::{Serialize, Deserialize};
 #[cfg(feature = "serialize_serde")]
 use crate::serde_array::serde_arrays;
 
-use zerocopy::little_endian::{U16, U32};
+use zerocopy::little_endian::{U16, U32, U64};
 use zerocopy_derive::{FromBytes, Immutable, IntoBytes, Unaligned};
 
-use crate::{common_types::QHash256, error::{DogeBridgeError, QDogeResult}};
+use crate::{block_state::{PsyBridgeHeader, PsyBridgeStateCommitment}, common_types::QHash256, error::{DogeBridgeError, QDogeResult}};
 
 
 #[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
@@ -48,7 +48,11 @@ pub struct BlockDataRecord {
     pub block_hash_tree_root: QHash256,
     pub block_hash: QHash256,
     pub tx_tree_merkle_root: QHash256,
+    pub auto_claimed_txo_tree_root: QHash256,
+    pub auto_claimed_deposits_tree_root: QHash256,
+    pub auto_claimed_deposits_next_index: U32,
     pub timestamp: U32,
+    pub total_fees_collected_chain_history: U64,
     pub bits: U32,
 }
 
@@ -76,7 +80,6 @@ pub struct BlockDataTracker<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize> {
     #[serde(with = "serde_arrays")]
     pub records: [BlockDataRecord; QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE],
 }
-
 #[cfg(not(feature = "serialize_serde"))]
 #[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes,  IntoBytes, Immutable, Unaligned)]
@@ -113,6 +116,104 @@ impl<const QDOGE_BRIDGE_BLOCK_HASH_CACHE_SIZE: usize> BlockDataTracker<QDOGE_BRI
             tip_internal_index: tip_internal_index.into(),
             records: records,
         }
+    }
+
+    pub fn get_tip_state_commitment(&self) -> PsyBridgeStateCommitment {
+        let record = self.get_record_ref(self.get_tip_block_number()).expect("Tip block must exist in tracker");
+        PsyBridgeStateCommitment {
+            block_hash: record.block_hash,
+            block_merkle_tree_root: record.block_hash_tree_root,
+            auto_claimed_txo_tree_root: record.auto_claimed_txo_tree_root,
+            auto_claimed_deposits_tree_root: record.auto_claimed_deposits_tree_root,
+            auto_claimed_deposits_next_index: record.auto_claimed_deposits_next_index.into(),
+            block_height: self.get_tip_block_number(),
+        }
+    }
+    pub fn get_finalized_state_commitment(&self, required_confirmations: u32) -> QDogeResult<PsyBridgeStateCommitment> {
+        let finalized_block_number = self.get_finalized_block_number(required_confirmations);
+        let record = self.get_record(finalized_block_number)?;
+        Ok(PsyBridgeStateCommitment {
+            block_hash: record.block_hash,
+            block_merkle_tree_root: record.block_hash_tree_root,
+            auto_claimed_txo_tree_root: record.auto_claimed_txo_tree_root,
+            auto_claimed_deposits_tree_root: record.auto_claimed_deposits_tree_root,
+            auto_claimed_deposits_next_index: record.auto_claimed_deposits_next_index.into(),
+            block_height: finalized_block_number,
+        })
+    }
+
+    pub fn verify_state_commitment_matches_block_tracker(
+        &self,
+        header: &PsyBridgeStateCommitment,
+        required_confirmations: u32,
+        is_last_finalized: bool,
+    ) -> anyhow::Result<()> {
+        if !self.contains_block(header.block_height) {
+            return Err(anyhow::anyhow!(
+                "Block height {} not in block data tracker cache",
+                header.block_height
+            ));
+        }
+        if is_last_finalized {
+            if self.get_finalized_block_number(required_confirmations) != header.block_height {
+                return Err(anyhow::anyhow!(
+                    "Block height {} is not the finalized block number {} in block data tracker",
+                    header.block_height,
+                    self.get_finalized_block_number(required_confirmations)
+                ));
+            }            
+        }else{
+            if self.get_tip_block_number() != header.block_height {
+                return Err(anyhow::anyhow!(
+                    "Block height {} is not the tip block number {} in block data tracker",
+                    header.block_height,
+                    self.get_tip_block_number()
+                ));
+            }
+        }
+        let record = self.get_record(header.block_height)?;
+        if record.auto_claimed_deposits_tree_root != header.auto_claimed_deposits_tree_root {
+            return Err(anyhow::anyhow!(
+                "auto_claimed_deposits_tree_root mismatch at block height {}: expected {:?}, got {:?}",
+                header.block_height,
+                record.auto_claimed_deposits_tree_root,
+                header.auto_claimed_deposits_tree_root
+            ));
+        }
+        if record.auto_claimed_txo_tree_root != header.auto_claimed_txo_tree_root {
+            return Err(anyhow::anyhow!(
+                "auto_claimed_txo_tree_root mismatch at block height {}: expected {:?}, got {:?}",
+                header.block_height,
+                record.auto_claimed_txo_tree_root,
+                header.auto_claimed_txo_tree_root
+            ));
+        }
+        if record.block_hash != header.block_hash {
+            return Err(anyhow::anyhow!(
+                "block_hash mismatch at block height {}: expected {:?}, got {:?}",
+                header.block_height,
+                record.block_hash,
+                header.block_hash
+            ));
+        }
+        if record.block_hash_tree_root != header.block_merkle_tree_root {
+            return Err(anyhow::anyhow!(
+                "block_hash_tree_root mismatch at block height {}: expected {:?}, got {:?}",
+                header.block_height,
+                record.block_hash_tree_root,
+                header.block_merkle_tree_root
+            ));
+        }
+        if record.auto_claimed_deposits_next_index != header.auto_claimed_deposits_next_index {
+            return Err(anyhow::anyhow!(
+                "auto_claimed_deposits_next_index mismatch at block height {}: expected {}, got {}",
+                header.block_height,
+                record.auto_claimed_deposits_next_index,
+                header.auto_claimed_deposits_next_index
+            ));
+        }
+        
+        Ok(())
     }
 
     pub fn get_block_hash_if_exists(&self, block_number: u32) -> Option<QHash256> {

@@ -26,7 +26,7 @@ with contributions from Carter Feldman (https://x.com/cmpeq)."
 
 use doge_light_client::{
     doge::{
-        address::{BTCAddress160, BTCAddressType},
+        address::{BTCAddress160, BTCAddressType, gen_p2sh_script},
         transaction::BTCTransactionOutput,
     },
     hash::{ripemd160::QBTCHash160Hasher, traits::BytesHasher},
@@ -78,6 +78,12 @@ pub fn get_bridge_deposit_address_v1(
         address_type: BTCAddressType::P2SH,
         address: get_bridge_deposit_address_hash_v1(user_public_key, bridge_public_key_hash),
     }
+}
+pub fn get_bridge_deposit_output_script(
+    user_public_key: &[u8],
+    bridge_public_key_hash: &[u8],
+) -> [u8; 23] {
+     gen_p2sh_script(&get_bridge_deposit_address_hash_v1(user_public_key, bridge_public_key_hash))
 }
 
 pub fn is_bridge_desposit_output_v1_for_user(

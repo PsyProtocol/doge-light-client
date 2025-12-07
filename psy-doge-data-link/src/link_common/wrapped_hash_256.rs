@@ -43,3 +43,15 @@ pub fn q_proof_to_wq_proof(proof: &MerkleProofCore<QHash256>) -> MerkleProofCore
         root: WrappedHash256(proof.root),
     }
 }
+
+
+impl From<WrappedHash256> for QHash256 {
+    fn from(wrapped: WrappedHash256) -> Self {
+        wrapped.0
+    }
+}
+impl From<QHash256> for WrappedHash256 {
+    fn from(hash: QHash256) -> Self {
+        WrappedHash256(hash)
+    }
+}

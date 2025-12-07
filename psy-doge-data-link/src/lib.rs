@@ -24,6 +24,8 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 pub mod link_common;
+#[cfg(feature = "link_async")]
 pub mod link_async;
 pub mod traits;
+#[cfg(feature = "link_sync")]
 pub mod link_sync;

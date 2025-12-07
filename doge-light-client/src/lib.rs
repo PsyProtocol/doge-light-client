@@ -37,3 +37,8 @@ pub mod init_params;
 pub mod chain_state;
 #[cfg(feature = "serialize_serde")]
 pub mod serde_array;
+
+#[cfg(feature = "serialize_speedy")]
+pub mod block_data_tracker_zc;
+
+pub mod block_state;

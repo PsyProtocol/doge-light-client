@@ -2,6 +2,10 @@
 name = "psy-doge-data-link"
 version = "0.1.0"
 edition = "2021"
+[features]
+default = ["link_sync", "link_async"]
+link_sync = ["dep:ureq"]
+link_async = ["dep:tokio", "dep:async-trait", "dep:reqwest", "dep:futures-util"]
 
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }
@@ -22,13 +26,26 @@ anyhow = { workspace = true }
 doge-light-client = { path = "../doge-light-client", default-features = false, features = ["sha2", "serialize_serde", "serialize_borsh", "serialize_speedy", "bitcoin", "std", "serialize_bytemuck"] }
 psy-doge-bridge-helper = { path = "../psy-doge-bridge-helper", default-features = false, features = ["sha2", "serialize_serde", "serialize_speedy", "std", "serialize_bytemuck"] }
 
+tokio = { version = "1.43.0", features = ["full"], optional = true }
+futures-util = { version = "0.3.28", optional = true }
+async-trait = { version = "0.1.88", optional = true }
+reqwest = { version = "=0.12.24", features = ["json"], optional = true }
 
-ureq = "3.0.9"
+ureq = { version = "3.0.9", features = ["json"], optional = true }
 serde_json = "1.0"
 bincode = "=1.3.3"
 
 hex = { workspace = true }
 hex-literal = { workspace = true }
+
+
 [dev-dependencies]
 rand = { workspace = true }
 rand_core = { workspace = true }
+
+ureq = { version = "3.0.9", features = ["json"] }
+tokio = { version = "1.43.0", features = ["full"] }
+futures-util = { version = "0.3.28" }
+async-trait = { version = "0.1.88" }
+
+reqwest = { version = "=0.12.24", features = ["json"] }

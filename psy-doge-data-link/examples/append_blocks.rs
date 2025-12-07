@@ -50,7 +50,8 @@ fn run_gen_block_start(
     for i in 0..block_count {
         let new_tip = start_tip + i + 1;
         let block_header = fetcher.get_qdoge_block_header(new_tip)?;
-        tracker.append_block::<DogeMainNetConfig>(new_tip, &block_header, None)?;
+        todo!();
+        //tracker.append_block::<DogeMainNetConfig>(new_tip, &block_header, None)?;
         println!("new_tip: {}", tracker.get_tip_block_number());
     }
 

@@ -1,0 +1,250 @@
+/*
+Copyright (C) 2025 Zero Knowledge Labs Limited, Psy Protocol
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Additional terms under GNU AGPL version 3 section 7:
+
+As permitted by section 7(b) of the GNU Affero General Public License,
+you must retain the following attribution notice in all copies or
+substantial portions of the software:
+
+"This software was created by Psy Protocol (https://psy.xyz)
+with contributions from Carter Feldman (https://x.com/cmpeq)."
+*/
+
+use std::time::Duration;
+
+use bitcoin::Block;
+use doge_light_client::{
+    common_types::QHash256,
+    core_data::{
+        QDogeBlock, QDogeBlockHeader,
+    },
+    doge::transaction::BTCTransaction,
+    hash::{
+        merkle::{merkle_proof::MerkleProofCore, utils::compute_root_merkle_proof_generic},
+        sha256::QBTCHash256Hasher,
+    },
+    network_params::DogeNetworkType,
+};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use ureq::Agent;
+
+use crate::link_common::{bitcoin_convert::btc_block_to_qdoge, wrapped_hash_256::WrappedHash256};
+use crate::{
+    traits::{QDogeBlockFetcher, QDogeBlockHeaderFetcher},
+};
+
+#[derive(Debug, Clone)]
+pub struct DogeLinkElectrsClient {
+    electrs_url: String,
+    pub network: DogeNetworkType,
+    electrs_client: ureq::Agent,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct ElectrumMerkleProofOutput {
+    pub merkle: Vec<WrappedHash256>,
+    pub block_height: u32,
+    pub pos: u32,
+}
+
+impl ElectrumMerkleProofOutput {
+    pub fn to_merkle_proof_core_with_txid(&self, txid: QHash256) -> MerkleProofCore<QHash256> {
+        let g_siblings = self
+            .merkle
+            .iter()
+            .map(|x| x.reversed().0)
+            .collect::<Vec<QHash256>>();
+        let value = WrappedHash256(txid).reversed().0;
+        let root = compute_root_merkle_proof_generic::<QHash256, QBTCHash256Hasher>(
+            value,
+            self.pos as u64,
+            &g_siblings,
+        );
+        MerkleProofCore {
+            siblings: g_siblings,
+            root: root,
+            value: value,
+            index: self.pos as u64,
+        }
+    }
+}
+
+impl DogeLinkElectrsClient {
+    pub fn new(electrs_url: String, network: DogeNetworkType) -> Self {
+        let electrs_client = Agent::config_builder()
+            .timeout_global(Some(Duration::from_secs(60)))
+            .build()
+            .into();
+        DogeLinkElectrsClient {
+            electrs_url,
+            network,
+            electrs_client,
+        }
+    }
+    pub fn get_json<T: DeserializeOwned>(&self, path: &str) -> anyhow::Result<T> {
+        let url = format!("{}/{}", self.electrs_url, path);
+        let response = self
+            .electrs_client
+            .get(&url)
+            .call()?
+            .body_mut()
+            .read_to_string()?;
+        serde_json::from_str(&response).map_err(|e| anyhow::anyhow!("{:?}", e))
+    }
+    pub fn get_bytes(&self, path: &str) -> anyhow::Result<Vec<u8>> {
+        let url = format!("{}/{}", self.electrs_url, path);
+        let res = self
+            .electrs_client
+            .get(&url)
+            .call()?
+            .body_mut()
+            .read_to_vec()?;
+        Ok(res)
+    }
+    pub fn get_text(&self, path: &str) -> anyhow::Result<String> {
+        let url = format!("{}/{}", self.electrs_url, path);
+        let res = self
+            .electrs_client
+            .get(&url)
+            .call()?
+            .body_mut()
+            .read_to_string()?;
+        Ok(res)
+    }
+
+    pub fn get_block_height(&self) -> anyhow::Result<u32> {
+        let height: u32 = self.get_json("blocks/tip/height")?;
+        Ok(height)
+    }
+    pub fn get_block_hash(&self, height: u32) -> anyhow::Result<QHash256> {
+        let hash_txt = self.get_text(&format!("block-height/{}", height))?;
+        let mut hash = [0u8; 32];
+        hex::decode_to_slice(hash_txt, &mut hash)?;
+        Ok(hash)
+    }
+    pub fn get_q_tx_from_txid(&self, txid: QHash256) -> anyhow::Result<BTCTransaction> {
+        let txid_str = hex::encode(txid);
+        let bytes = self.get_bytes(&format!("tx/{}/raw", txid_str))?;
+        BTCTransaction::from_bytes(&bytes)
+    }
+    pub fn get_electrum_merkle_proof_from_txid(
+        &self,
+        txid: QHash256,
+    ) -> anyhow::Result<ElectrumMerkleProofOutput> {
+        let txid_str = hex::encode(txid);
+        self.get_json(&format!("tx/{}/merkle-proof", txid_str))
+    }
+    pub fn get_electrum_merkle_proof_from_tx_hash(
+        &self,
+        tx_hash: QHash256,
+    ) -> anyhow::Result<ElectrumMerkleProofOutput> {
+        let mut txid = [0u8; 32];
+        txid.copy_from_slice(&tx_hash);
+        txid.reverse();
+        let txid_str = hex::encode(txid);
+        self.get_json(&format!("tx/{}/merkle-proof", txid_str))
+    }
+    pub fn get_q_merkle_proof_from_txid(
+        &self,
+        txid: QHash256,
+    ) -> anyhow::Result<MerkleProofCore<QHash256>> {
+        Ok(self
+            .get_electrum_merkle_proof_from_txid(txid)?
+            .to_merkle_proof_core_with_txid(txid))
+    }
+    pub fn get_q_merkle_proof_from_tx_hash(
+        &self,
+        tx_hash: QHash256,
+    ) -> anyhow::Result<MerkleProofCore<QHash256>> {
+        Ok(self
+            .get_electrum_merkle_proof_from_tx_hash(tx_hash)?
+            .to_merkle_proof_core_with_txid(WrappedHash256(tx_hash).reversed().0))
+    }
+    pub fn get_block(&self, height: u32) -> anyhow::Result<Block> {
+        let hash_txt = self.get_text(&format!("block-height/{}", height))?;
+        let block_data = self.get_bytes(&format!("block/{}/raw", hash_txt))?;
+        let btc_block: Block = bitcoin::consensus::encode::deserialize(&block_data)?;
+
+        //let bh  = bitcoin::consensus::encode::serialize(&btc_block.header);
+        //println!("bh_len: {}", bh.len());
+
+        Ok(btc_block)
+    }
+    pub fn get_blocks(&self, heights: &[u32]) -> anyhow::Result<Vec<Block>> {
+        let mut blocks = Vec::with_capacity(heights.len());
+        for h in heights.iter() {
+            blocks.push(self.get_block(*h)?);
+        }
+        Ok(blocks)
+    }
+    pub fn get_qd_block(&self, height: u32) -> anyhow::Result<QDogeBlock> {
+        btc_block_to_qdoge(&self.get_block(height)?)
+    }
+    pub fn get_qd_blocks(&self, heights: &[u32]) -> anyhow::Result<Vec<QDogeBlock>> {
+        let mut blocks = Vec::with_capacity(heights.len());
+        for h in heights.iter() {
+            blocks.push(self.get_qdoge_block(*h)?);
+        }
+        Ok(blocks)
+    }
+}
+
+impl QDogeBlockFetcher for DogeLinkElectrsClient {
+    fn get_qdoge_block(&self, height: u32) -> anyhow::Result<QDogeBlock> {
+        self.get_qd_block(height)
+    }
+
+    fn get_qdoge_blocks(&self, heights: &[u32]) -> anyhow::Result<Vec<QDogeBlock>> {
+        self.get_qd_blocks(heights)
+    }
+
+    fn get_qdoge_block_cache(&mut self, height: u32) -> anyhow::Result<QDogeBlock> {
+        self.get_qd_block(height)
+    }
+
+    fn get_qdoge_blocks_cache(&mut self, heights: &[u32]) -> anyhow::Result<Vec<QDogeBlock>> {
+        self.get_qd_blocks(heights)
+    }
+}
+impl QDogeBlockHeaderFetcher for DogeLinkElectrsClient {
+    fn get_qdoge_block_header(&self, height: u32) -> anyhow::Result<QDogeBlockHeader> {
+        Ok(self.get_qd_block(height)?.to_qdoge_block_header())
+    }
+
+    fn get_qdoge_block_headers(&self, heights: &[u32]) -> anyhow::Result<Vec<QDogeBlockHeader>> {
+        Ok(self
+            .get_qd_blocks(heights)?
+            .iter()
+            .map(|x| x.to_qdoge_block_header())
+            .collect())
+    }
+
+    fn get_qdoge_block_header_cache(&mut self, height: u32) -> anyhow::Result<QDogeBlockHeader> {
+        Ok(self.get_qd_block(height)?.to_qdoge_block_header())
+    }
+
+    fn get_qdoge_block_headers_cache(
+        &mut self,
+        heights: &[u32],
+    ) -> anyhow::Result<Vec<QDogeBlockHeader>> {
+        Ok(self
+            .get_qd_blocks(heights)?
+            .iter()
+            .map(|x| x.to_qdoge_block_header())
+            .collect())
+    }
+}

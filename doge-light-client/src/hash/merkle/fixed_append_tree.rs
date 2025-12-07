@@ -53,7 +53,6 @@ pub struct FixedMerkleAppendTree<Hash: PartialEq + Copy, const HEIGHT: usize> wh
     #[serde_as(as = "[_; HEIGHT]")]
     pub levels: [MerkleAppendTreeLevel<Hash>; HEIGHT],
 }*/
-
 #[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, FromBytes, KnownLayout, IntoBytes, Unaligned, Immutable)]
 #[repr(C)]
@@ -61,6 +60,7 @@ pub struct FixedMerkleAppendTree<Hash: PartialEq + Copy, const HEIGHT: usize> {
     pub next_index: U64,
     pub levels: [MerkleAppendTreeLevel<Hash>; HEIGHT],
 }
+
 
 #[cfg(feature = "serialize_serde")]
 #[cfg_attr(feature = "serialize_borsh", derive(BorshSerialize, BorshDeserialize))]

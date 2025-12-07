@@ -29,6 +29,9 @@ speedy = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_with = { workspace = true, optional = true }
 solana-program ={ workspace = true, optional = true }
+zerocopy = { workspace = true }
+zerocopy-derive = { workspace = true }
+
 
 [dev-dependencies]
 rand = { workspace = true }

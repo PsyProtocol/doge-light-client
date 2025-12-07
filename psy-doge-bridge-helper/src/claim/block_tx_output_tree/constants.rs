@@ -1,3 +1,7 @@
+use doge_light_client::common_types::QHash256;
+
+use crate::utils::sha256_zero_hashes::SHA256_ZERO_HASHES;
+
 pub const TXO_TREE_INDEX_BITS_BLOCK_NUM_LENGTH: usize = 28;
 pub const TXO_TREE_INDEX_BITS_TX_NUM_LENGTH: usize = 13;
 pub const TXO_TREE_INDEX_BITS_TOP_OUTPUT_NUM_LENGTH: usize = 4;
@@ -31,6 +35,14 @@ pub const TXO_TREE_INDEX_BLOCK_NUM_LOWERED_MASK: u64 = (1u64 << TXO_TREE_INDEX_B
 pub const TXO_TREE_INDEX_TX_NUM_LOWERED_MASK: u64 = (1u64 << TXO_TREE_INDEX_BITS_TX_NUM_LENGTH) - 1;
 pub const TXO_TREE_INDEX_OUTPUT_NUM_LOWERED_MASK: u64 = (1u64 << TXO_TREE_COMBINED_INDEX_BITS_OUTPUT_NUM_LENGTH) - 1;
 
+pub const TXO_FULL_MERKLE_TREE_HEIGHT: usize = TXO_MERKLE_INDEX_TOTAL_BITS;
+pub const TXO_BLOCK_FULL_MERKLE_TREE_HEIGHT: usize = TXO_TREE_INDEX_BITS_TX_NUM_LENGTH + TXO_TREE_INDEX_BITS_TOP_OUTPUT_NUM_LENGTH;
+pub const TXO_TRANSACTION_FULL_MERKLE_TREE_HEIGHT: usize = TXO_TREE_INDEX_BITS_TOP_OUTPUT_NUM_LENGTH;
+
+
+pub const TXO_EMPTY_MERKLE_TREE_ROOT: QHash256 = SHA256_ZERO_HASHES[TXO_FULL_MERKLE_TREE_HEIGHT];
+pub const TXO_EMPTY_BLOCK_MERKLE_TREE_ROOT: QHash256 = SHA256_ZERO_HASHES[TXO_BLOCK_FULL_MERKLE_TREE_HEIGHT];
+pub const TXO_EMPTY_TRANSACTION_MERKLE_TREE_ROOT: QHash256 = SHA256_ZERO_HASHES[TXO_TRANSACTION_FULL_MERKLE_TREE_HEIGHT];
 
 
 #[inline(always)]
@@ -105,6 +117,36 @@ pub const fn is_valid_siblings_length_for_txo_merkle_proof(siblings_length: usiz
     siblings_length == TXO_MERKLE_TREE_HEIGHT
 }
 
+#[inline(always)]
+pub const fn get_output_in_tx_merkle_index_bit_index(output_index_in_tx: u16) -> (u8, u8) {
+    
+    let bit_index = (output_index_in_tx & 0xFF) as u8;
+    let merkle_index = (output_index_in_tx >> 8) as u8;
+    (merkle_index, bit_index)
+}
+
+
+#[inline(always)]
+pub const fn get_output_in_tx_merkle_index_bit_index_byte_index_bit_mask(output_index_in_tx: u16) -> (u8, u8, u8, u8) {
+    
+    let merkle_index = (output_index_in_tx >> TXO_TREE_LEAF_BIT_INDEX_LENGTH) as u8;
+    let bit_index = (output_index_in_tx - ((merkle_index as u16) << TXO_TREE_LEAF_BIT_INDEX_LENGTH)) as u8;
+    let bit_mask = bit_index & 7;
+    let byte_index = bit_index >> 3;
+    
+
+    (merkle_index, bit_index, byte_index, bit_mask)
+}
+#[inline(always)]
+pub const fn get_output_bit_index_in_leaf(output_index_in_tx: u16) -> (u8, u8, u8) {
+    
+    let merkle_index = (output_index_in_tx >> 8) as u8;
+    let byte_bit_index = (output_index_in_tx - (merkle_index as u16 * 256)) as u8;
+    let bit_mask = byte_bit_index & 7;
+    let byte_index = byte_bit_index >> 3;
+
+    (merkle_index, byte_index, bit_mask)
+}
 #[cfg(test)]
 mod tests {
     use super::*;

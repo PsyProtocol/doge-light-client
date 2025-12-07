@@ -61,6 +61,8 @@ pub fn compute_txo_merkle_proof_in_memory(
 
 
 
+
+
 pub fn compute_txo_delta_merkle_root(
     old_output_bit_vector_leaf: QHash256,
     new_output_bit_vector_leaf: QHash256,

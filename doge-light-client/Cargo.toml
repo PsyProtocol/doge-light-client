@@ -10,12 +10,15 @@ serialize_serde = ["dep:serde", "dep:serde_with", "zerocopy/serde"]
 bitcoin = ["dep:bitcoin", "serialize_serde"]
 solprogram = ["dep:solana-program"]
 sha2 = ["dep:sha2"]
+sp1 = ["dep:sha2-v0-10-9"]
 std = []
 
 serialize_speedy = ["dep:speedy", "zerocopy/speedy"]
 serialize_bytemuck = ["dep:bytemuck", "zerocopy/bytemuck"]
 
 [dependencies]
+sha2-v0-10-9 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", tag = "patch-sha2-0.10.9-sp1-4.0.0", optional = true }	
+
 serde = { workspace = true, optional = true }
 serde_with = { workspace = true, optional = true }
 bs58 = { workspace = true }

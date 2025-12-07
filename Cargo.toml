@@ -5,7 +5,8 @@ members = [
     "doge-light-client",
     "psy-doge-bridge-helper",
     "psy-doge-macros",
-    "doge-bridge-block-state"
+    "doge-bridge-block-state",
+    "psy-doge-wallet"
 
 ]
 

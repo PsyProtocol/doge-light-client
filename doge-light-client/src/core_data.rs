@@ -431,6 +431,18 @@ impl QAuxPow {
 #[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
 #[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
 #[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
+pub struct QDogeBlockHeaderAndClaimInfo {
+    pub block_header: QDogeBlockHeader,
+    pub claimed_txo_tree_root: QHash256,
+    pub auto_claimed_deposits_tree_root: QHash256,
+    pub fees_collected_for_block: u64,
+    pub auto_claimed_deposits_next_index: u32,
+}
+
+#[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+#[cfg_attr(feature = "serialize_speedy", derive(speedy::Readable, speedy::Writable))]
+#[derive(Clone, Debug, PartialEq, Default, Eq, Ord, PartialOrd)]
 pub struct QDogeBlockHeader {
     pub header: QStandardBlockHeader,
     pub aux_pow: Option<QAuxPow>,
@@ -448,12 +460,59 @@ impl QDogeBlockHeader {
         }
         v
     }
+    pub fn from_consensus_bytes(data: &[u8]) -> anyhow::Result<Self> {
+        if data.len() < 80 {
+            anyhow::bail!(
+                "error deserializing QDogeBlockHeader: expected at least 80 bytes, got {}",
+                data.len()
+            );
+        }
+        let header = QStandardBlockHeader::from_bytes(&data[0..80]).map_err(|e| {
+            anyhow::anyhow!("error deserializing QDogeBlockHeader header: {}", e)
+        })?;
+        let aux_pow = if header.is_aux_pow() {
+            let (aux, _size) = QAuxPow::decode_consensus_bytes(&data[80..]).map_err(|e| {
+                anyhow::anyhow!("error deserializing QDogeBlockHeader aux_pow: {}", e)
+            })?;
+            Some(aux)
+        } else {
+            None
+        };
+        Ok(Self { header, aux_pow })
+    }
+
+
+    pub fn from_consensus_bytes_with_length(data: &[u8]) -> anyhow::Result<(usize, Self)> {
+        if data.len() < 80 {
+            anyhow::bail!(
+                "error deserializing QDogeBlockHeader: expected at least 80 bytes, got {}",
+                data.len()
+            );
+        }
+        let header = QStandardBlockHeader::from_bytes(&data[0..80]).map_err(|e| {
+            anyhow::anyhow!("error deserializing QDogeBlockHeader header: {}", e)
+        })?;
+        let mut size = 80;
+        let aux_pow = if header.is_aux_pow() {
+            let (aux, aux_size) = QAuxPow::decode_consensus_bytes(&data[80..]).map_err(|e| {
+                anyhow::anyhow!("error deserializing QDogeBlockHeader aux_pow: {}", e)
+            })?;
+            size += aux_size;
+            Some(aux)
+        } else {
+            None
+        };
+        Ok((size, Self { header, aux_pow }))
+    }
     pub fn get_hash(&self) -> QHash256 {
         self.header.get_hash()
     }
 
     pub fn get_pow_hash(&self) -> QHash256 {
         self.header.get_pow_hash()
+    }
+    pub fn is_aux_pow(&self) -> bool {
+        self.header.is_aux_pow()
     }
 }
 
@@ -473,5 +532,52 @@ impl QDogeBlock {
             header: self.header.clone(),
             aux_pow: self.aux_pow.clone(),
         }
+    }
+    pub fn get_hash(&self) -> QHash256 {
+        self.header.get_hash()
+    }
+    pub fn to_consensus_bytes(&self) -> Vec<u8> {
+        let mut v = Vec::new();
+        v.extend_from_slice(&self.header.to_bytes_fixed());
+        match &self.aux_pow {
+            Some(aux) => {
+                v.extend_from_slice(&aux.to_consensus_bytes());
+            }
+            None => {}
+        }
+        v.extend_from_slice(&encode_varuint(self.transactions.len() as u64));
+        for tx in self.transactions.iter() {
+            v.extend_from_slice(&tx.to_bytes());
+        }
+        v
+    }
+    pub fn from_consensus_bytes(data: &[u8]) -> anyhow::Result<Self> {
+        if data.len() < 80 {
+            anyhow::bail!(
+                "error deserializing QDogeBlock: expected at least 80 bytes, got {}",
+                data.len()
+            );
+        }
+        let (size_header, header) = QDogeBlockHeader::from_consensus_bytes_with_length(&data).map_err(|e| {
+            anyhow::anyhow!("error deserializing QDogeBlock header: {}", e)
+        })?;
+        let mut offset = size_header;
+        let (tx_count, size_tx_count) = decode_varuint_partial(&data[offset..]).map_err(|e| {
+            anyhow::anyhow!("error deserializing QDogeBlock tx_count: {}", e)
+        })?;
+        offset += size_tx_count;
+        let mut txs = Vec::with_capacity(tx_count as usize);
+        for _ in 0..tx_count {
+            let (tx, offset_new) = BTCTransaction::from_bytes_offset(&data, offset).map_err(|e| {
+                anyhow::anyhow!("error deserializing QDogeBlock transaction: {}", e)
+            })?;
+            offset = offset_new;
+            txs.push(tx);
+        }
+        Ok(Self {
+            header: header.header,
+            aux_pow: header.aux_pow,
+            transactions: txs,
+        })
     }
 }

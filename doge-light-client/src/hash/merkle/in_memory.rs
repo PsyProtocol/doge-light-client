@@ -1,4 +1,4 @@
-use crate::{common_types::QHash256, hash::{sha256::btc_hash256_bytes, sha256_impl::hash_impl_sha256_bytes}};
+use crate::{common_types::QHash256, hash::{sha256::btc_hash256_bytes, sha256_impl::{hash_impl_btc_hash256_two_to_one_bytes, hash_impl_sha256_bytes, hash_impl_sha256_two_to_one_bytes}}};
 
 pub fn compute_dogecoin_last_transaction_in_block_merkle_root_in_memory(
     value: QHash256,
@@ -77,6 +77,36 @@ pub fn compute_dogecoin_block_transaction_merkle_proof_tree_root_in_memory(
             buf[32..64].copy_from_slice(&current);
         }
         current = btc_hash256_bytes(&buf);
+        index >>= 1;
+    }
+    if index != 0 {
+        // wrong number of siblings
+        return None;
+    }
+    Some(current)
+}
+
+
+
+pub fn compute_dogecoin_block_transaction_merkle_proof_tree_root_hash256(
+    value: QHash256,
+    siblings: &[QHash256],
+    mut index: u32,
+) -> Option<QHash256> {
+    let mut current = value;
+    for sibling in siblings.iter() {
+        if index & 1 == 0 {
+            current = hash_impl_btc_hash256_two_to_one_bytes(&current, sibling);
+        } else {
+            // sibling is on the left, we need to check for the odd-leaf rule
+            // see CVE-2012-2459, https://github.com/bitcoin/bitcoin/blob/9a29b2d331eed5b4cbd6922f63e397b68ff12447/src/consensus/merkle.cpp#L9
+            if sibling == &current {
+                // if the sibling is the same as the current, then our merkle path is on a duplicate node path
+                // meaning that the block has fewer transactions than claimed_total_transaction_count
+                return None;
+            }
+            current = hash_impl_btc_hash256_two_to_one_bytes(sibling, &current);
+        }
         index >>= 1;
     }
     if index != 0 {

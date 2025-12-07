@@ -24,6 +24,8 @@ substantial portions of the software:
 with contributions from Carter Feldman (https://x.com/cmpeq)."
 */
 
+use crate::{common_types::{QHash160, QHash256}, hash::{ripemd160_impl::hash_impl_ripemd160_bytes, sha256_impl::hash_impl_sha256_bytes}};
+
 pub trait ZeroableHash: Sized + Copy + Clone {
     fn get_zero_value() -> Self;
 }
@@ -103,4 +105,37 @@ pub trait QStandardHasher<Hash: PartialEq + Copy>: MerkleHasher<Hash> + BytesHas
 }
 
 impl<T: MerkleHasher<Hash> + BytesHasher<Hash> + MerkleZeroHasher<Hash>, Hash: PartialEq + Copy> QStandardHasher<Hash> for T {
+}
+
+
+
+
+pub trait DogeHashProvider {
+    fn hash_bytes_sha256(data: &[u8]) -> QHash256;
+    fn hash_bytes_ripemd160(data: &[u8]) -> QHash160;
+
+    // performs ripemd160(sha256(data))
+    fn bitcoin_hash160(data: &[u8]) -> QHash160 {
+        let sha256_hash = Self::hash_bytes_sha256(data);
+        Self::hash_bytes_ripemd160(&sha256_hash)
+    }
+
+    // performs sha256(sha256(data))
+    fn bitcoin_hash256(data: &[u8]) -> QHash256 {
+        let first_hash = Self::hash_bytes_sha256(data);
+        Self::hash_bytes_sha256(&first_hash)
+    }
+
+}
+
+
+pub struct CommonDogeHashProvider;
+
+impl DogeHashProvider for CommonDogeHashProvider {
+    fn hash_bytes_sha256(data: &[u8]) -> QHash256 {
+        hash_impl_sha256_bytes(data)
+    }
+    fn hash_bytes_ripemd160(data: &[u8]) -> QHash160 {
+        hash_impl_ripemd160_bytes(data)
+    }
 }

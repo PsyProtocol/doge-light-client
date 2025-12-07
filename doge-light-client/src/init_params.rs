@@ -33,6 +33,8 @@ use crate::{
         traits::MerkleHasher,
     }
 };
+const DEFAULT_AUTO_CLAIM_DEPOSITS_TREE_ROOT: QHash256 = [198, 246, 126, 2, 230, 228, 225, 189, 239, 185, 148, 198, 9, 137, 83, 243, 70, 54, 186, 43, 108, 162, 10, 71, 33, 210, 178, 106, 136, 103, 34, 255];
+const DEFAULT_TXO_TREE_ROOT: QHash256 = [250, 250, 48, 37, 242, 248, 149, 9, 194, 199, 28, 116, 251, 160, 205, 146, 133, 142, 244, 155, 7, 128, 251, 84, 121, 116, 108, 138, 155, 252, 179, 70];
 
 #[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serialize_borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
@@ -64,6 +66,10 @@ impl From<InitBlockDataRecord> for BlockDataRecord {
             timestamp: x.timestamp.into(),
             bits: x.bits.into(),
             block_hash_tree_root: [0; 32],
+            auto_claimed_txo_tree_root: DEFAULT_TXO_TREE_ROOT,
+            auto_claimed_deposits_tree_root: DEFAULT_AUTO_CLAIM_DEPOSITS_TREE_ROOT,
+            auto_claimed_deposits_next_index: 0.into(),
+            total_fees_collected_chain_history: 0.into(),
         }
     }
 }
@@ -76,6 +82,10 @@ impl From<&InitBlockDataRecord> for BlockDataRecord {
             timestamp: x.timestamp.into(),
             bits: x.bits.into(),
             block_hash_tree_root: [0; 32],
+            auto_claimed_txo_tree_root: DEFAULT_TXO_TREE_ROOT,
+            auto_claimed_deposits_tree_root: DEFAULT_AUTO_CLAIM_DEPOSITS_TREE_ROOT,
+            auto_claimed_deposits_next_index: 0.into(),
+            total_fees_collected_chain_history: 0.into(),
         }
     }
 }

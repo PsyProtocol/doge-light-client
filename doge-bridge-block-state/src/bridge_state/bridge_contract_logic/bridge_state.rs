@@ -1,6 +1,5 @@
-use doge_light_client::common_types::QHash256;
+use doge_light_client::{block_state::PsyBridgeHeader, common_types::QHash256};
 
-use crate::bridge_state::bridge_header::PsyBridgeHeader;
 
 
 #[cfg_attr(feature = "serialize_serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14,7 +13,8 @@ pub struct PsyContractBridgeState {
     pub pending_dtxo_bit_list_hash_stack: QHash256,
     pub pending_auto_processed_mint_hash_stack: QHash256,
     pub current_bridge_header: PsyBridgeHeader,
-    pub fees_balance_sats: u64,
+    pub total_fees_collected: u64,
+    pub total_fees_withdrawn: u64,
     pub required_confirmations: u32,
     pub total_blocks_processed: u32,
 }
